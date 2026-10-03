@@ -33,6 +33,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
     if (res.data.success) {
+      if (res.data.requireOtp) {
+        return {
+          requireOtp: true,
+          email: res.data.email,
+          role: res.data.role,
+          devOtp: res.data.devOtp,
+          message: res.data.message,
+        };
+      }
       const { token: newToken, user: newUser, student: newStudent } = res.data;
       localStorage.setItem('hc_token', newToken);
       localStorage.setItem('hc_user', JSON.stringify(newUser));
@@ -42,6 +51,17 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: newUser };
     }
     return { success: false, message: res.data.message };
+  };
+
+  const setUserFromToken = (newUser, newToken) => {
+    if (newToken) {
+      localStorage.setItem('hc_token', newToken);
+      setToken(newToken);
+    }
+    if (newUser) {
+      localStorage.setItem('hc_user', JSON.stringify(newUser));
+      setUser(newUser);
+    }
   };
 
   const register = async (formData) => {
@@ -81,6 +101,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUserData,
+    setUserFromToken,
     isAdmin: user?.role === 'admin',
     isWarden: user?.role === 'warden',
     isStudent: user?.role === 'student',

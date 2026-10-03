@@ -1,51 +1,11 @@
-import mongoose from 'mongoose';
+import pool from '../config/database.js';
+import { formatMessMenu } from '../utils/mysqlHelper.js';
 
-const messMenuSchema = new mongoose.Schema(
-  {
-    dayOfWeek: {
-      type: String,
-      enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      required: true,
-    },
-    mealType: {
-      type: String,
-      enum: ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Special'],
-      required: true,
-    },
-    foodItems: {
-      type: [String],
-      required: true,
-      default: [],
-    },
-    category: {
-      type: String,
-      enum: ['Vegetarian', 'Non-Vegetarian', 'Both', 'Special'],
-      default: 'Vegetarian',
-    },
-    calories: {
-      type: Number,
-      default: 500,
-    },
-    timing: {
-      type: String,
-      default: '',
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    date: {
-      type: Date,
-      default: null,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+export const tableName = 'mess_menus';
 
-// Compound index to ensure uniqueness for dayOfWeek + mealType
-messMenuSchema.index({ dayOfWeek: 1, mealType: 1 }, { unique: true });
+export const findById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM mess_menus WHERE id = ?', [id]);
+  return rows.length ? formatMessMenu(rows[0]) : null;
+};
 
-const MessMenu = mongoose.model('MessMenu', messMenuSchema);
-export default MessMenu;
+export default { tableName, findById };

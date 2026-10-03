@@ -84,10 +84,13 @@ const MealAttendancePage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+              <CalendarCheck className="w-6 h-6" />
+            </span>
             Meal Attendance & Dining Tracker
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
             Real-time mess check-ins, dining headcounts, and student food logs
           </p>
         </div>
@@ -95,38 +98,38 @@ const MealAttendancePage = () => {
 
       {/* Analytics KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-card flex items-center space-x-4">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+        <div className="bg-[#070D22]/80 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/15 shadow-glass flex items-center space-x-4">
+          <div className="p-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-xl">
             <UtensilsCrossed className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Today's Total Meals</p>
-            <h3 className="text-2xl font-black text-slate-900">
+            <p className="text-xs font-bold text-cyan-300/80 uppercase">Today's Total Meals</p>
+            <h3 className="text-2xl font-black text-white">
               {stats?.totalServedToday || 0} Meals
             </h3>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-card flex items-center space-x-4">
-          <div className="p-3 bg-cyan-50 text-cyan-600 rounded-xl">
+        <div className="bg-[#070D22]/80 backdrop-blur-md rounded-2xl p-5 border border-purple-500/15 shadow-glass flex items-center space-x-4">
+          <div className="p-3 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Today's Breakdown</p>
-            <p className="text-xs font-semibold text-slate-700 mt-0.5">
+            <p className="text-xs font-bold text-purple-300/80 uppercase">Today's Breakdown</p>
+            <p className="text-xs font-semibold text-zinc-300 mt-0.5">
               B: {stats?.breakdownToday?.breakfast || 0} | L: {stats?.breakdownToday?.lunch || 0} | D:{' '}
               {stats?.breakdownToday?.dinner || 0}
             </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-card flex items-center space-x-4">
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+        <div className="bg-[#070D22]/80 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/15 shadow-glass flex items-center space-x-4">
+          <div className="p-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-xl">
             <CalendarCheck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Semester Meals Served</p>
-            <h3 className="text-2xl font-black text-slate-900">
+            <p className="text-xs font-bold text-cyan-300/80 uppercase">Semester Meals Served</p>
+            <h3 className="text-2xl font-black text-white">
               {stats?.totalAllTime || 0} Meals
             </h3>
           </div>
@@ -134,24 +137,24 @@ const MealAttendancePage = () => {
       </div>
 
       {/* Date & Meal Filter Row */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#070D22]/80 backdrop-blur-md p-4 rounded-2xl border border-cyan-500/15 shadow-glass flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold text-slate-500 uppercase">Date:</span>
+            <span className="text-xs font-bold text-zinc-400 uppercase">Date:</span>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium"
+              className="px-3 py-1.5 text-xs bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold text-slate-500 uppercase">Meal Slot:</span>
+            <span className="text-xs font-bold text-zinc-400 uppercase">Meal Slot:</span>
             <select
               value={mealType}
               onChange={(e) => setMealType(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium"
+              className="px-3 py-1.5 text-xs bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             >
               <option value="Breakfast">Breakfast</option>
               <option value="Lunch">Lunch</option>
@@ -160,21 +163,21 @@ const MealAttendancePage = () => {
           </div>
         </div>
 
-        <div className="text-xs text-slate-500 font-medium">
-          Showing: <span className="font-bold text-indigo-600">{mealType}</span> on{' '}
-          <span className="font-bold text-slate-800">{new Date(date).toLocaleDateString()}</span>
+        <div className="text-xs text-zinc-400 font-medium">
+          Showing: <span className="font-bold text-cyan-400">{mealType}</span> on{' '}
+          <span className="font-bold text-white">{new Date(date).toLocaleDateString()}</span>
         </div>
       </div>
 
       {/* Main Roster / Student History Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
+      <div className="bg-[#070D22]/80 backdrop-blur-md rounded-2xl border border-cyan-500/15 shadow-glass overflow-hidden">
         {loading ? (
           <LoadingSpinner size="md" message="Loading meal records..." />
         ) : isStudent ? (
           /* Student Personal Log */
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+            <table className="w-full text-left text-xs text-zinc-300">
+              <thead className="bg-[#050816]/90 text-cyan-300 font-bold uppercase tracking-wider text-[11px] border-b border-cyan-500/20">
                 <tr>
                   <th className="px-5 py-3.5">Date</th>
                   <th className="px-5 py-3.5">Meal Slot</th>
@@ -182,32 +185,32 @@ const MealAttendancePage = () => {
                   <th className="px-5 py-3.5 text-right">Verification</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-cyan-500/10">
                 {attendanceRecords.length > 0 ? (
                   attendanceRecords.map((r) => (
-                    <tr key={r._id} className="hover:bg-slate-50">
-                      <td className="px-5 py-3.5 font-bold text-slate-800">{r.date}</td>
-                      <td className="px-5 py-3.5 text-slate-600">{r.mealType}</td>
+                    <tr key={r._id || r.id} className="hover:bg-cyan-500/5 transition-colors">
+                      <td className="px-5 py-3.5 font-bold text-white">{r.date}</td>
+                      <td className="px-5 py-3.5 text-zinc-400">{r.mealType}</td>
                       <td className="px-5 py-3.5">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             r.status === 'Present'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                           }`}
                         >
                           <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                           {r.status}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-right text-slate-400 text-[11px]">
+                      <td className="px-5 py-3.5 text-right text-zinc-500 text-[11px]">
                         Marked by Dining Staff
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="p-8 text-center text-slate-400 text-xs">
+                    <td colSpan="4" className="p-8 text-center text-zinc-500 text-xs">
                       No check-ins recorded on {date} for {mealType}.
                     </td>
                   </tr>
@@ -218,8 +221,8 @@ const MealAttendancePage = () => {
         ) : (
           /* Admin / Warden Check-in Roster */
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+            <table className="w-full text-left text-xs text-zinc-300">
+              <thead className="bg-[#050816]/90 text-cyan-300 font-bold uppercase tracking-wider text-[11px] border-b border-cyan-500/20">
                 <tr>
                   <th className="px-5 py-3.5">Student</th>
                   <th className="px-5 py-3.5">Student ID</th>
@@ -228,49 +231,50 @@ const MealAttendancePage = () => {
                   <th className="px-5 py-3.5 text-right">Quick Mark</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-cyan-500/10">
                 {students.map((st) => {
-                  const record = getAttendanceForStudent(st._id);
+                  const sId = st._id || st.id;
+                  const record = getAttendanceForStudent(sId);
                   const isPresent = record?.status === 'Present';
 
                   return (
-                    <tr key={st._id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={sId} className="hover:bg-cyan-500/5 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
-                            {st.userId?.name?.[0] || 'S'}
+                          <div className="w-8 h-8 rounded-full bg-purple-500/15 text-purple-400 flex items-center justify-center font-bold text-xs border border-purple-500/20">
+                            {(st.userId?.name || st.name)?.[0] || 'S'}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900">{st.userId?.name}</p>
-                            <p className="text-[11px] text-slate-400">{st.course}</p>
+                            <p className="font-bold text-white">{st.userId?.name || st.name}</p>
+                            <p className="text-[11px] text-zinc-500">{st.course || 'Resident'}</p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-5 py-3.5 font-semibold text-indigo-600">
-                        {st.studentId}
+                      <td className="px-5 py-3.5 font-semibold text-cyan-400">
+                        {st.studentId || st.studentIdentifier}
                       </td>
 
-                      <td className="px-5 py-3.5 text-slate-600">
-                        {st.hostelId?.name ? `${st.hostelId.name} - Room ${st.roomId?.roomNumber || 'N/A'}` : 'Not Allocated'}
+                      <td className="px-5 py-3.5 text-zinc-400">
+                        {st.hostelId?.name || st.hostelName ? `${st.hostelId?.name || st.hostelName} - Room ${st.roomId?.roomNumber || st.roomNumber || 'N/A'}` : 'Not Allocated'}
                       </td>
 
                       <td className="px-5 py-3.5">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             isPresent
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-500 border border-slate-200'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
+                              : 'bg-zinc-800 text-zinc-500 border border-zinc-700/50'
                           }`}
                         >
                           {isPresent ? (
                             <>
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />
                               Present
                             </>
                           ) : (
                             <>
-                              <XCircle className="w-3.5 h-3.5 mr-1 text-slate-400" />
+                              <XCircle className="w-3.5 h-3.5 mr-1 text-zinc-500" />
                               Not Checked In
                             </>
                           )}
@@ -280,11 +284,11 @@ const MealAttendancePage = () => {
                       <td className="px-5 py-3.5 text-right">
                         <button
                           disabled={marking}
-                          onClick={() => handleToggleAttendance(st._id, record?.status)}
+                          onClick={() => handleToggleAttendance(sId, record?.status)}
                           className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-sm transition-all ${
                             isPresent
-                              ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
-                              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200'
+                              ? 'bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 border border-rose-500/30'
+                              : 'bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white shadow-neon-cyan'
                           }`}
                         >
                           {isPresent ? 'Mark Absent' : 'Mark Present'}

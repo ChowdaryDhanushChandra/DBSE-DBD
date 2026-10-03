@@ -1,39 +1,11 @@
-import mongoose from 'mongoose';
+import pool from '../config/database.js';
+import { formatNotification } from '../utils/mysqlHelper.js';
 
-const notificationSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    message: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: ['room', 'fee', 'complaint', 'announcement', 'mess', 'document', 'system'],
-      default: 'system',
-    },
-    link: {
-      type: String,
-      default: '',
-    },
-    isRead: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+export const tableName = 'notifications';
 
-const Notification = mongoose.model('Notification', notificationSchema);
-export default Notification;
+export const findById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM notifications WHERE id = ?', [id]);
+  return rows.length ? formatNotification(rows[0]) : null;
+};
+
+export default { tableName, findById };

@@ -1,41 +1,11 @@
-import mongoose from 'mongoose';
+import pool from '../config/database.js';
+import { formatAnnouncement } from '../utils/mysqlHelper.js';
 
-const announcementSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: [true, 'Please provide announcement title'],
-      trim: true,
-    },
-    message: {
-      type: String,
-      required: [true, 'Please provide announcement message'],
-    },
-    targetAudience: {
-      type: String,
-      enum: ['All Students', 'Specific Hostel', 'Specific Users'],
-      default: 'All Students',
-    },
-    hostelId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hostel',
-      default: null,
-    },
-    priority: {
-      type: String,
-      enum: ['Normal', 'Important', 'Urgent'],
-      default: 'Normal',
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+export const tableName = 'announcements';
 
-const Announcement = mongoose.model('Announcement', announcementSchema);
-export default Announcement;
+export const findById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM announcements WHERE id = ?', [id]);
+  return rows.length ? formatAnnouncement(rows[0]) : null;
+};
+
+export default { tableName, findById };

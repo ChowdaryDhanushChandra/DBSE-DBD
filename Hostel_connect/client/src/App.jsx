@@ -11,6 +11,9 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import { ForgotPassword, ResetPassword } from './pages/auth/ForgotPassword';
+import ExploreRoomsPage from './pages/public/ExploreRoomsPage';
+import FeaturesPage from './pages/public/FeaturesPage';
+import DiningPage from './pages/public/DiningPage';
 
 // Dashboards
 import AdminDashboard from './pages/dashboard/AdminDashboard';
@@ -31,6 +34,19 @@ import AnnouncementsPage from './pages/announcements/AnnouncementsPage';
 import DocumentManagement from './pages/documents/DocumentManagement';
 import ReportsPage from './pages/reports/ReportsPage';
 import SettingsPage from './pages/settings/SettingsPage';
+
+// Smart Mess & Hostel Hygiene Modules
+import MealFeedbackPage from './pages/mess/MealFeedbackPage';
+import MessAnalyticsPage from './pages/mess/MessAnalyticsPage';
+import WeeklyMessReportPage from './pages/mess/WeeklyMessReportPage';
+import CleanlinessScorePage from './pages/hygiene/CleanlinessScorePage';
+import WeeklyInspectionPage from './pages/hygiene/WeeklyInspectionPage';
+import HygieneComplaintsPage from './pages/hygiene/HygieneComplaintsPage';
+import HygieneAnalyticsPage from './pages/hygiene/HygieneAnalyticsPage';
+
+// Parcel & Visitor Management Modules
+import ParcelManagementPage from './pages/parcels/ParcelManagementPage';
+import VisitorManagementPage from './pages/visitors/VisitorManagementPage';
 
 // Protected Route Wrapper with RBAC
 const ProtectedRoute = ({ allowedRoles, children }) => {
@@ -65,6 +81,11 @@ function App() {
     <Routes>
       {/* Public Pages */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/explore-rooms" element={<ExploreRoomsPage />} />
+      <Route path="/rooms-showcase" element={<Navigate to="/explore-rooms" replace />} />
+      <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/dining-info" element={<DiningPage />} />
+      <Route path="/dining" element={<Navigate to="/dining-info" replace />} />
       <Route
         path="/login"
         element={
@@ -101,7 +122,16 @@ function App() {
         <Route path="rooms" element={<RoomManagement />} />
         <Route path="allocations" element={<RoomAllocation />} />
         <Route path="mess" element={<MessMenuPage />} />
+        <Route path="mess-feedback" element={<MealFeedbackPage />} />
+        <Route path="mess-analytics" element={<MessAnalyticsPage />} />
+        <Route path="mess-report" element={<WeeklyMessReportPage />} />
+        <Route path="hygiene-cleanliness" element={<CleanlinessScorePage />} />
+        <Route path="hygiene-inspections" element={<WeeklyInspectionPage />} />
+        <Route path="hygiene-complaints" element={<HygieneComplaintsPage />} />
+        <Route path="hygiene-analytics" element={<HygieneAnalyticsPage />} />
         <Route path="fees" element={<FeeManagement />} />
+        <Route path="parcels" element={<ParcelManagementPage />} />
+        <Route path="visitors" element={<VisitorManagementPage />} />
         <Route path="complaints" element={<ComplaintList />} />
         <Route path="announcements" element={<AnnouncementsPage />} />
         <Route path="documents" element={<DocumentManagement />} />
@@ -124,7 +154,16 @@ function App() {
         <Route path="students/:id" element={<StudentProfile />} />
         <Route path="rooms" element={<RoomManagement />} />
         <Route path="allocations" element={<RoomAllocation />} />
+        <Route path="parcels" element={<ParcelManagementPage />} />
+        <Route path="visitors" element={<VisitorManagementPage />} />
         <Route path="mess" element={<MealAttendancePage />} />
+        <Route path="mess-feedback" element={<MealFeedbackPage />} />
+        <Route path="mess-analytics" element={<MessAnalyticsPage />} />
+        <Route path="mess-report" element={<WeeklyMessReportPage />} />
+        <Route path="hygiene-cleanliness" element={<CleanlinessScorePage />} />
+        <Route path="hygiene-inspections" element={<WeeklyInspectionPage />} />
+        <Route path="hygiene-complaints" element={<HygieneComplaintsPage />} />
+        <Route path="hygiene-analytics" element={<HygieneAnalyticsPage />} />
         <Route path="complaints" element={<ComplaintList />} />
         <Route path="announcements" element={<AnnouncementsPage />} />
         <Route path="documents" element={<DocumentManagement />} />
@@ -145,8 +184,13 @@ function App() {
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="profile" element={<StudentProfile />} />
         <Route path="my-room" element={<MyRoom />} />
+        <Route path="parcels" element={<ParcelManagementPage />} />
+        <Route path="visitors" element={<VisitorManagementPage />} />
         <Route path="mess-menu" element={<MessMenuPage />} />
+        <Route path="meal-feedback" element={<MealFeedbackPage />} />
         <Route path="attendance" element={<MealAttendancePage />} />
+        <Route path="hygiene-cleanliness" element={<CleanlinessScorePage />} />
+        <Route path="hygiene-complaints" element={<HygieneComplaintsPage />} />
         <Route path="fees" element={<FeeManagement />} />
         <Route path="complaints" element={<ComplaintList />} />
         <Route path="announcements" element={<AnnouncementsPage />} />

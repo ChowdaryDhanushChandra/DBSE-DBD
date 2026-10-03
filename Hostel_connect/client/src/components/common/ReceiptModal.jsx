@@ -9,80 +9,83 @@ export const ReceiptModal = ({ isOpen, onClose, fee }) => {
     window.print();
   };
 
-  const studentName = fee.studentId?.userId?.name || 'Student';
-  const studentEmail = fee.studentId?.userId?.email || 'N/A';
-  const hostelName = fee.studentId?.hostelId?.name || 'Main Campus Hostel';
-  const roomNumber = fee.studentId?.roomId?.roomNumber || 'Room N/A';
+  const studentName = fee.studentName || fee.studentId?.userId?.name || 'Student';
+  const studentEmail = fee.studentEmail || fee.studentId?.userId?.email || 'N/A';
+  const hostelName = fee.hostelName || fee.studentId?.hostelId?.name || 'Main Campus Hostel';
+  const roomNumber = fee.roomNumber || fee.studentId?.roomId?.roomNumber || 'Room N/A';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Payment Receipt" maxWidth="max-w-2xl">
-      <div id="printable-receipt" className="p-4 bg-white rounded-xl space-y-6 text-slate-800">
+      <div id="printable-receipt" className="p-4 bg-[#050816]/90 rounded-xl space-y-6 text-slate-200 border border-cyan-500/20">
         {/* Header */}
-        <div className="flex items-center justify-between border-b pb-5 border-slate-100">
+        <div className="flex items-center justify-between border-b pb-5 border-white/10">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-indigo-200">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center text-white font-bold text-xl shadow-[0_0_20px_rgba(0,229,255,0.4)]">
               <Building className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">HOSTEL CONNECT</h2>
-              <p className="text-xs text-slate-500 font-medium">Official Payment Receipt & Voucher</p>
+              <h2 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                HOSTEL CONNECT
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">PAY-VOUCHER</span>
+              </h2>
+              <p className="text-xs text-slate-400 font-medium">Official Payment Receipt & Digital Voucher</p>
             </div>
           </div>
           <div className="text-right">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
               <CheckCircle className="w-3.5 h-3.5 mr-1" />
               {fee.paymentStatus?.toUpperCase()}
             </span>
-            <p className="text-xs text-slate-400 mt-1">Invoice: {fee.invoiceNumber}</p>
+            <p className="text-xs text-slate-400 mt-1 font-mono">Invoice: {fee.invoiceNumber}</p>
           </div>
         </div>
 
         {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+        <div className="grid grid-cols-2 gap-4 text-sm bg-white/[0.03] p-4 rounded-xl border border-white/10">
           <div>
-            <p className="text-xs text-slate-400 font-medium uppercase">Billed To</p>
-            <p className="font-semibold text-slate-800 mt-0.5">{studentName}</p>
-            <p className="text-xs text-slate-500">{studentEmail}</p>
-            <p className="text-xs text-slate-500 mt-1">{hostelName} - {roomNumber}</p>
+            <p className="text-xs text-cyan-400/80 font-medium uppercase tracking-wider">Billed To</p>
+            <p className="font-bold text-white mt-0.5">{studentName}</p>
+            <p className="text-xs text-slate-400">{studentEmail}</p>
+            <p className="text-xs text-slate-400 mt-1">{hostelName} - {roomNumber}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-400 font-medium uppercase">Payment Details</p>
-            <p className="text-xs text-slate-600 mt-0.5">
-              <span className="font-medium">Txn ID:</span> {fee.transactionId || 'N/A'}
+            <p className="text-xs text-cyan-400/80 font-medium uppercase tracking-wider">Payment Details</p>
+            <p className="text-xs text-slate-300 mt-0.5 font-mono">
+              <span className="font-medium text-slate-400 font-sans">Txn ID:</span> {fee.transactionId || 'N/A'}
             </p>
-            <p className="text-xs text-slate-600">
-              <span className="font-medium">Method:</span> {fee.paymentMethod || 'Online'}
+            <p className="text-xs text-slate-300">
+              <span className="font-medium text-slate-400">Method:</span> {fee.paymentMethod || 'Online'}
             </p>
-            <p className="text-xs text-slate-600">
-              <span className="font-medium">Date:</span>{' '}
+            <p className="text-xs text-slate-300">
+              <span className="font-medium text-slate-400">Date:</span>{' '}
               {fee.paymentDate ? new Date(fee.paymentDate).toLocaleDateString() : new Date().toLocaleDateString()}
             </p>
           </div>
         </div>
 
         {/* Invoice Item Table */}
-        <div className="border border-slate-100 rounded-xl overflow-hidden">
+        <div className="border border-white/10 rounded-xl overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+            <thead className="bg-white/[0.04] text-slate-300 text-xs uppercase font-semibold">
               <tr>
                 <th className="px-4 py-3">Description</th>
                 <th className="px-4 py-3">Academic Period</th>
                 <th className="px-4 py-3 text-right">Amount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               <tr>
-                <td className="px-4 py-3 font-medium text-slate-800">{fee.feeType}</td>
-                <td className="px-4 py-3 text-slate-500">{fee.academicSemester || 'Fall Semester 2024'}</td>
-                <td className="px-4 py-3 text-right font-semibold text-slate-800">
+                <td className="px-4 py-3 font-medium text-white">{fee.feeType}</td>
+                <td className="px-4 py-3 text-slate-400">{fee.academicSemester || 'Fall Semester 2024'}</td>
+                <td className="px-4 py-3 text-right font-semibold text-white">
                   ₹{fee.amount?.toLocaleString('en-IN')}
                 </td>
               </tr>
             </tbody>
-            <tfoot className="bg-slate-50/70 border-t border-slate-100 font-bold">
+            <tfoot className="bg-white/[0.04] border-t border-white/10 font-bold">
               <tr>
-                <td colSpan="2" className="px-4 py-3 text-slate-700">Total Paid</td>
-                <td className="px-4 py-3 text-right text-indigo-600 text-base">
+                <td colSpan="2" className="px-4 py-3 text-slate-300">Total Paid</td>
+                <td className="px-4 py-3 text-right text-cyan-400 text-base font-extrabold text-glow">
                   ₹{fee.amount?.toLocaleString('en-IN')}
                 </td>
               </tr>
@@ -92,11 +95,11 @@ export const ReceiptModal = ({ isOpen, onClose, fee }) => {
 
         {/* Footer info */}
         <div className="flex items-center justify-between text-xs text-slate-400 pt-2">
-          <p>This is a computer-generated voucher and requires no physical signature.</p>
+          <p>This is a computer-generated voucher verified by Hostel Connect.</p>
           <div className="flex items-center space-x-2 print:hidden">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-indigo-200 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl text-xs font-semibold shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-all cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5 mr-1.5" />
               Print Receipt

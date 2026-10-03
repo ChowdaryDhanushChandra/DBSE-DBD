@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Check, ExternalLink, Info, AlertTriangle, AlertCircle, Building } from 'lucide-react';
+import { Bell, Check, ExternalLink, Info, AlertTriangle, AlertCircle, Building, Package, UserCheck } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import { Link } from 'react-router-dom';
 
@@ -21,13 +21,17 @@ const NotificationDropdown = () => {
   const getIcon = (type) => {
     switch (type) {
       case 'room':
-        return <Building className="w-4 h-4 text-indigo-600" />;
+        return <Building className="w-4 h-4 text-cyan-400" />;
       case 'fee':
-        return <AlertCircle className="w-4 h-4 text-amber-600" />;
+        return <AlertCircle className="w-4 h-4 text-purple-400" />;
       case 'complaint':
-        return <AlertTriangle className="w-4 h-4 text-rose-600" />;
+        return <AlertTriangle className="w-4 h-4 text-pink-400" />;
+      case 'parcel':
+        return <Package className="w-4 h-4 text-amber-400" />;
+      case 'visitor':
+        return <UserCheck className="w-4 h-4 text-emerald-400" />;
       default:
-        return <Info className="w-4 h-4 text-sky-600" />;
+        return <Info className="w-4 h-4 text-cyan-300" />;
     }
   };
 
@@ -35,24 +39,24 @@ const NotificationDropdown = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition-colors"
+        className="relative p-2 text-zinc-400 hover:text-cyan-400 hover:bg-white/[0.05] rounded-xl transition-colors"
         title="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-sm">
+          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-500 text-[10px] font-bold text-black shadow-[0_0_10px_#00E5FF] animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-xl border border-slate-100 py-3 z-50 animate-fade-in">
-          <div className="flex items-center justify-between px-4 pb-2 border-b border-slate-100">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#0a0e27]/95 backdrop-blur-2xl shadow-[0_10px_40px_-5px_rgba(0,0,0,0.8)] border border-purple-500/30 py-3 z-50 animate-fade-in">
+          <div className="flex items-center justify-between px-4 pb-2 border-b border-purple-500/20">
             <div className="flex items-center space-x-2">
-              <h4 className="text-sm font-bold text-slate-800">Notifications</h4>
+              <h4 className="text-sm font-bold text-white">Notifications</h4>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                   {unreadCount} new
                 </span>
               )}
@@ -60,7 +64,7 @@ const NotificationDropdown = () => {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center transition-colors"
+                className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center transition-colors"
               >
                 <Check className="w-3 h-3 mr-1" />
                 Mark all read
@@ -68,47 +72,52 @@ const NotificationDropdown = () => {
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto divide-y divide-slate-50">
+          <div className="max-h-80 overflow-y-auto divide-y divide-white/[0.04]">
             {notifications.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">
-                No notifications right now
+              <div className="py-8 text-center text-xs text-zinc-400">
+                No notifications to display
               </div>
             ) : (
-              notifications.map((notif) => (
-                <div
-                  key={notif._id}
-                  onClick={() => {
-                    if (!notif.isRead) markAsRead(notif._id);
-                    setIsOpen(false);
-                  }}
-                  className={`px-4 py-3 hover:bg-slate-50 transition-colors flex items-start space-x-3 cursor-pointer ${
-                    !notif.isRead ? 'bg-indigo-50/40' : ''
-                  }`}
-                >
+              notifications.map((notif) => {
+                const notifId = notif.id || notif._id;
+                return (
                   <div
-                    className={`mt-0.5 p-2 rounded-xl shrink-0 ${
-                      !notif.isRead ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'
+                    key={notifId}
+                    className={`p-3.5 hover:bg-white/[0.03] transition-colors flex items-start space-x-3 ${
+                      !notif.isRead ? 'bg-purple-500/[0.07]' : ''
                     }`}
+                    onClick={() => {
+                      if (!notif.isRead) markAsRead(notifId);
+                    }}
                   >
-                    <Bell className="w-3.5 h-3.5" />
+                    <div className="p-2 rounded-xl bg-[#050816] border border-white/10 shrink-0 mt-0.5">
+                      {getIcon(notif.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-white truncate">
+                          {notif.title}
+                        </p>
+                        <span className="text-[10px] text-zinc-400 shrink-0 font-mono">
+                          {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-300 mt-0.5 leading-snug line-clamp-2">
+                        {notif.message}
+                      </p>
+                      {notif.link && (
+                        <Link
+                          to={notif.link}
+                          onClick={() => setIsOpen(false)}
+                          className="inline-flex items-center text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 mt-1.5"
+                        >
+                          View Details <ExternalLink className="w-3 h-3 ml-1" />
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-xs ${!notif.isRead ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
-                      {notif.title}
-                    </p>
-                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">
-                      {notif.message}
-                    </p>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} •{' '}
-                      {new Date(notif.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  {!notif.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0 mt-1.5" />
-                  )}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

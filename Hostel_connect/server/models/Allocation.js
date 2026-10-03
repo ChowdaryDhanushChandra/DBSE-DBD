@@ -1,44 +1,11 @@
-import mongoose from 'mongoose';
+import pool from '../config/database.js';
+import { formatAllocation } from '../utils/mysqlHelper.js';
 
-const allocationSchema = new mongoose.Schema(
-  {
-    studentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true,
-    },
-    hostelId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hostel',
-      required: true,
-    },
-    roomId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Room',
-      required: true,
-    },
-    allocationDate: {
-      type: Date,
-      default: Date.now,
-    },
-    vacateDate: {
-      type: Date,
-      default: null,
-    },
-    status: {
-      type: String,
-      enum: ['Active', 'Transferred', 'Vacated'],
-      default: 'Active',
-    },
-    remarks: {
-      type: String,
-      default: '',
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+export const tableName = 'allocations';
 
-const Allocation = mongoose.model('Allocation', allocationSchema);
-export default Allocation;
+export const findById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM allocations WHERE id = ?', [id]);
+  return rows.length ? formatAllocation(rows[0]) : null;
+};
+
+export default { tableName, findById };

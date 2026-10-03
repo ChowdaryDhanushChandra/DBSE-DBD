@@ -95,18 +95,21 @@ const AnnouncementsPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <Megaphone className="w-6 h-6" />
+            </span>
             Announcements & Notices
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Campus-wide broadcasts, hostel notifications, and maintenance schedules
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            Sector-wide broadcasts, orbital alerts, and maintenance dispatches
           </p>
         </div>
 
         {(isAdmin || isWarden) && (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-indigo-200 transition-all self-start sm:self-auto"
+            className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl shadow-neon-cyan transition-all self-start sm:self-auto"
           >
             <Plus className="w-4 h-4 mr-1.5" />
             Post Announcement
@@ -127,48 +130,55 @@ const AnnouncementsPage = () => {
         />
       ) : (
         <div className="space-y-4">
-          {announcements.map((a) => (
-            <div
-              key={a._id}
-              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-card hover:shadow-lg transition-all"
-            >
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
-                    <Megaphone className="w-5 h-5" />
+          {announcements.map((a) => {
+            const aId = a._id || a.id;
+            const author = a.createdBy?.name || a.authorName || 'Sector Command';
+            const role = a.createdBy?.role || a.authorRole || 'Staff';
+            const hName = a.hostelId?.name || a.hostelName;
+
+            return (
+              <div
+                key={aId}
+                className="bg-[#070D22]/80 backdrop-blur-md rounded-2xl p-6 border border-cyan-500/15 hover:border-cyan-500/35 shadow-glass hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition-all"
+              >
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold shrink-0">
+                      <Megaphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white">{a.title}</h3>
+                      <p className="text-[11px] text-zinc-400">
+                        Posted by: <span className="font-semibold text-zinc-200">{author}</span> ({role}) •{' '}
+                        {new Date(a.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">{a.title}</h3>
-                    <p className="text-[11px] text-slate-400">
-                      Posted by: <span className="font-semibold text-slate-600">{a.createdBy?.name}</span> ({a.createdBy?.role}) •{' '}
-                      {new Date(a.createdAt).toLocaleDateString()}
-                    </p>
+
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#050816] text-cyan-300 border border-cyan-500/20">
+                      {a.targetAudience}
+                      {hName ? ` (${hName})` : ''}
+                    </span>
+                    <StatusBadge status={a.priority} />
+                    {(isAdmin || (isWarden && (a.createdBy?._id === user?._id || a.createdBy === user?.id))) && (
+                      <button
+                        onClick={() => handleDelete(aId)}
+                        title="Delete Announcement"
+                        className="p-1.5 text-zinc-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 shrink-0">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                    {a.targetAudience}
-                    {a.hostelId ? ` (${a.hostelId.name})` : ''}
-                  </span>
-                  <StatusBadge status={a.priority} />
-                  {(isAdmin || (isWarden && a.createdBy?._id === user?._id)) && (
-                    <button
-                      onClick={() => handleDelete(a._id)}
-                      title="Delete Announcement"
-                      className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed pl-13">
+                  {a.message}
+                </p>
               </div>
-
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pl-13">
-                {a.message}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -181,24 +191,24 @@ const AnnouncementsPage = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Announcement Title *</label>
+            <label className="block font-bold text-zinc-300 mb-1">Announcement Title *</label>
             <input
               type="text"
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g. Annual Sports Day Registrations"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Target Audience</label>
+              <label className="block font-bold text-zinc-300 mb-1">Target Audience</label>
               <select
                 value={formData.targetAudience}
                 onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               >
                 <option value="All Students">All Students</option>
                 <option value="Specific Hostel">Specific Hostel</option>
@@ -206,11 +216,11 @@ const AnnouncementsPage = () => {
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Priority</label>
+              <label className="block font-bold text-zinc-300 mb-1">Priority</label>
               <select
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               >
                 <option value="Normal">Normal</option>
                 <option value="Important">Important</option>
@@ -221,45 +231,45 @@ const AnnouncementsPage = () => {
 
           {formData.targetAudience === 'Specific Hostel' && (
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Select Hostel *</label>
+              <label className="block font-bold text-zinc-300 mb-1">Select Hostel *</label>
               <select
                 required
                 value={formData.hostelId}
                 onChange={(e) => setFormData({ ...formData, hostelId: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               >
                 <option value="">-- Choose Hostel --</option>
                 {hostels.map((h) => (
-                  <option key={h._id} value={h._id}>{h.name}</option>
+                  <option key={h._id || h.id} value={h._id || h.id}>{h.name}</option>
                 ))}
               </select>
             </div>
           )}
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Announcement Body *</label>
+            <label className="block font-bold text-zinc-300 mb-1">Announcement Body *</label>
             <textarea
               rows="4"
               required
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               placeholder="Write notice text here..."
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
-          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-cyan-500/10">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 bg-slate-100 rounded-xl font-semibold text-slate-600"
+              className="px-4 py-2 bg-[#050816] hover:bg-zinc-800 rounded-xl font-semibold text-zinc-300 border border-zinc-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-200 disabled:opacity-50"
+              className="px-5 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl font-bold shadow-neon-cyan disabled:opacity-50 transition-all"
             >
               {submitting ? 'Publishing...' : 'Publish Announcement'}
             </button>

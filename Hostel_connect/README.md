@@ -1,227 +1,278 @@
-# HOSTEL CONNECT 🏢
-### Smart Hostel & Mess Management System (MERN Stack)
+# 🌌 HOSTEL CONNECT — ORBITAL CAMPUS RESIDENCE SUITE
+### Enterprise Smart Hostel & Mess Management System (MySQL 8.0 + Node.js + React 18 + Space-Tech UI)
 
-**Hostel Connect** is a production-style full-stack digital platform engineered for educational institutions to eliminate manual paperwork and centralize hostel accommodation, room allocations, mess operations, student fee settlements, maintenance complaint tracking, and document verification.
+**Hostel Connect** is a production-grade, full-stack digital platform engineered for higher education institutions to completely eliminate manual paperwork and centralize hostel room allocations, mess dining operations, student fee settlements, maintenance complaint resolution, identity document verification, and cryptographic audit reporting.
+
+Now upgraded with:
+1. **Enterprise MySQL 8.0 Relational Architecture**: 13 interconnected relational tables with foreign keys, cascading constraints, indexed lookups, and ACID transactions. Zero MongoDB dependencies.
+2. **Futuristic Space-Tech Cinematic UI**: Deep cosmic canvas (`#050816`), neon purple (`#7B61FF`), neon cyan (`#00E5FF`), and hot pink (`#FF4D9D`) cyber accents, glassmorphic HUD panels, and an interactive Canvas starfield with mouse parallax.
 
 ---
 
-## 🚀 Key Features
+## 🚀 System Architecture & Key Capabilities
 
 ### 1. Multi-Role Portals & Role-Based Access Control (RBAC)
-- **ADMIN**: Complete system governance — student records, hostel configuration, room capacity management, automated billing, broadcast notices, document approvals, and analytics reports.
-- **WARDEN / STAFF**: Day-to-day hostel operations — floor inspection, room allocation & transfers, student rosters, maintenance issue tracking & assignment, daily meal attendance marking.
-- **STUDENT**: Self-service resident hub — room details & roommate directory, weekly dining menu with calories, fee dues & instant payment simulation, complaint submission with live status timeline, and identity document uploads.
+- **ADMIN**: Complete institutional governance — student rosters, hostel sector configuration, room capacity enforcement, batch fee generation, broadcast notices, document approvals, and audit reports with CSV/Print export.
+- **WARDEN / SECTOR COMMAND**: Real-time hostel operations — floor inspection, room allocation & student transfers, resident rosters, maintenance ticket lifecycle tracking, and daily meal attendance check-ins.
+- **STUDENT RESIDENT**: Resident self-service hub — pod details & co-resident directory, weekly dining menu with calorie breakdown, fee dues & instant payment simulation, maintenance ticketing with live chronological timelines, and credential uploads.
 
-### 2. Core Modules
-- 👥 **Student Management**: Full CRUD, search, multi-factor filtering (hostel, course, year, status), and comprehensive tabbed student profile dossiers.
-- 🛏️ **Room Management & Smart Allocation**: Visual room availability dashboard with color-coded occupancy badges (Available, Partial, Full, Maintenance). Capacity-enforced bed assignments with automatic room occupancy tracking.
-- 🍽️ **Mess Management & Dining Attendance**: 7-Day weekly meal scheduling (Breakfast, Lunch, Dinner, Special) with Veg/Non-Veg classifications, calorie counts, and daily student check-in sheets with analytics.
-- 💳 **Fee Management & Receipts**: Semester invoice generation, overdue checking, instant payment simulation (UPI, Cards, Net Banking, Cash), and downloadable/printable vouchers.
-- 🛠️ **Complaint & Maintenance System**: Student ticketing across 7 categories (Electricity, Water, Cleanliness, Maintenance, Food, Internet, Other) with priority tags, image attachments, staff assignment, and chronological lifecycle timelines.
-- 📢 **Targeted Announcements & Notifications**: Targeted broadcasts (All Students, Specific Hostel) with in-app notification bell alerts and unread counters.
-- 📄 **Document Verification Desk**: Student identity document upload (Aadhaar, Student ID, Admission letter) with administrative approval/rejection workflows and feedback notes.
+### 2. Core Functional Modules
+- 👥 **Resident Directory & Dossiers**: Search, multi-factor filtering (hostel sector, academic course, year, status), and comprehensive tabbed resident profile dossiers with dual field formatting (`id` / `_id`).
+- 🛏️ **Room Management & Smart Allocation**: Visual room availability grid with color-coded occupancy badges (Available, Partial, Full, Maintenance). Enforces capacity constraints and automatically synchronizes room occupancy counters using MySQL transactions.
+- 🍽️ **Mess Management & Dining Attendance**: 7-Day weekly meal scheduling (Breakfast, Lunch, Dinner, Special Feast) with Veg/Non-Veg classifications, calorie counts, and daily resident dining check-in sheets.
+- 💳 **Fee Management & Official Receipts**: Semester invoice issuance (individual or bulk), overdue tracking, instant simulated payment execution (UPI, Card, Net Banking, Cash), and downloadable/printable vouchers.
+- 🛠️ **Complaint & Maintenance Hub**: Resident ticketing across 7 categories (Electricity, Water, Cleanliness, Maintenance, Food, Internet, Other) with priority tags, administrative notes, and chronological lifecycle timelines stored in relational `complaint_timelines`.
+- 📢 **Targeted Broadcasts & Alerts**: Sector-wide announcements (All Students, Specific Hostel) with in-app notification bell alerts and unread counters.
+- 📄 **Document Verification Desk**: Resident credential uploads (Student ID, Aadhaar / National ID, Admission Letter, Medical Certificate) with administrative approval/rejection workflows and feedback logs.
 - 📊 **Audit Reports & Analytics**: Interactive charts (Recharts) and exportable reports (Room Occupancy, Students, Fees, Complaints) with one-click CSV and Print export.
 
 ---
 
 ## 💻 Technology Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS, React Router v6, Axios, Lucide Icons, Recharts, Canvas-Confetti.
-- **Backend**: Node.js, Express.js (MVC Architecture), JWT Authentication, bcryptjs, Multer file storage, Morgan.
-- **Database**: MongoDB with Mongoose ODM (includes zero-config embedded in-memory MongoDB fallback).
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend UI** | React 18, Vite 5, Tailwind CSS | High-performance SPA with Space-Tech design tokens |
+| **Styling & HUD** | Tailwind CSS + Custom CSS Utilities | Glassmorphic panels, cyber glowing borders, neon badges |
+| **Interactive Visuals** | HTML5 Canvas API | Orbital starfield particle engine with mouse parallax |
+| **Charts & Metrics** | Recharts | Neon-themed bar charts, line graphs, and donut charts |
+| **Backend Runtime** | Node.js (v18+) + Express.js | Production MVC REST API with JWT security |
+| **Database Engine** | **MySQL 8.0** | 13 normalized relational tables with foreign keys & indexes |
+| **MySQL Driver** | `mysql2/promise` | High-performance connection pooling with prepared statements |
+| **Security & Auth** | `bcryptjs` + `jsonwebtoken` (JWT) | Salt-hashed passwords (10 rounds) and stateless tokens |
+| **File Storage** | Multer | Local static file uploads for documents & attachments |
 
 ---
 
-## 🗄️ MongoDB Database Design (12 Collections)
+## 🗄️ MySQL 8.0 Relational Database Design (13 Tables)
 
-The application implements 12 distinct Mongoose collections with relational integrity and automated virtual calculations:
+The application utilizes **MySQL 8.0** with strict relational schema constraints located in `database/schema.sql`:
 
-1. **Users (`User.js`)**
-   - `name`, `email`, `password` (bcrypt salted), `role` (`admin`, `warden`, `student`), `profileImage`, `isActive`, `phone`, `createdAt`.
-2. **Students (`Student.js`)**
-   - `userId` (ref User), `studentId`, `course`, `department`, `year`, `phone`, `gender` (`Male`, `Female`, `Other`), `guardianName`, `guardianPhone`, `address`, `hostelId` (ref Hostel), `roomId` (ref Room), `status`.
-3. **Hostels (`Hostel.js`)**
-   - `name`, `location`, `gender` (`Boys`, `Girls`, `Co-ed`), `totalRooms`, `description`, `wardenId` (ref User), `contactPhone`, `image`.
-4. **Rooms (`Room.js`)**
-   - `hostelId` (ref Hostel), `roomNumber`, `floor`, `roomType` (`Single`, `Double`, `Triple`, `Four-Sharing`), `capacity`, `currentOccupancy`, `status` (`Available`, `Partially Occupied`, `Fully Occupied`, `Maintenance`), `pricePerSemester`.
-5. **Allocations (`Allocation.js`)**
-   - `studentId` (ref Student), `hostelId` (ref Hostel), `roomId` (ref Room), `allocationDate`, `vacateDate`, `status` (`Active`, `Transferred`, `Vacated`), `remarks`.
-6. **MessMenus (`MessMenu.js`)**
-   - `dayOfWeek` (`Monday`..`Sunday`), `mealType` (`Breakfast`, `Lunch`, `Dinner`, `Special`), `foodItems` (array of strings), `category` (`Vegetarian`, `Non-Vegetarian`, `Both`, `Special`), `calories`, `timing`, `description`.
-7. **MealAttendance (`MealAttendance.js`)**
-   - `studentId` (ref Student), `date` (`YYYY-MM-DD`), `mealType` (`Breakfast`, `Lunch`, `Dinner`), `status` (`Present`, `Absent`), `markedBy` (ref User).
-8. **Fees (`Fee.js`)**
-   - `studentId` (ref Student), `feeType` (`Hostel Fee`, `Mess Fee`, `Maintenance Fee`, `Other Fees`), `amount`, `dueDate`, `paymentDate`, `paymentStatus` (`Paid`, `Pending`, `Overdue`), `transactionId`, `paymentMethod`, `invoiceNumber`, `academicSemester`.
-9. **Complaints (`Complaint.js`)**
-   - `studentId` (ref Student), `title`, `category` (`Electricity`, `Water`, `Cleanliness`, `Maintenance`, `Food`, `Internet`, `Other`), `description`, `priority` (`Low`, `Medium`, `High`, `Urgent`), `status` (`Submitted`, `In Review`, `Assigned`, `In Progress`, `Resolved`, `Closed`), `assignedTo` (ref User), `resolutionNotes`, `image`, `timeline` (`[{ status, note, updatedBy, updatedAt }]`).
-10. **Announcements (`Announcement.js`)**
-    - `title`, `message`, `targetAudience` (`All Students`, `Specific Hostel`, `Specific Users`), `hostelId` (ref Hostel), `priority` (`Normal`, `Important`, `Urgent`), `createdBy` (ref User), `createdAt`.
-11. **Notifications (`Notification.js`)**
-    - `userId` (ref User), `title`, `message`, `type` (`room`, `fee`, `complaint`, `announcement`, `mess`, `document`, `system`), `link`, `isRead`, `createdAt`.
-12. **Documents (`Document.js`)**
-    - `studentId` (ref Student), `documentType` (`Student ID`, `Aadhaar / Identity Document`, `Admission Document`, `Medical Certificate`, `Other Hostel Documents`), `fileUrl`, `originalName`, `fileSize`, `status` (`Pending`, `Approved`, `Rejected`), `adminNotes`, `uploadDate`.
+1. **`users`**: System credentials (`id`, `name`, `email`, `password`, `role`, `profile_image`, `phone`, `is_active`, `created_at`).
+2. **`hostels`**: Accommodation sectors (`id`, `name`, `location`, `gender`, `total_rooms`, `description`, `warden_id`, `contact_phone`, `image`).
+3. **`rooms`**: Resident rooms (`id`, `hostel_id`, `room_number`, `floor`, `room_type`, `capacity`, `current_occupancy`, `status`, `price_per_semester`).
+4. **`students`**: Academic resident profiles (`id`, `user_id`, `student_id`, `course`, `department`, `year`, `phone`, `gender`, `guardian_name`, `guardian_phone`, `address`, `hostel_id`, `room_id`, `status`).
+5. **`allocations`**: Bed occupancy history (`id`, `student_id`, `hostel_id`, `room_id`, `allocation_date`, `vacate_date`, `status`, `remarks`).
+6. **`mess_menus`**: Weekly dining schedule (`id`, `day_of_week`, `meal_type`, `food_items`, `category`, `calories`, `timing`, `description`).
+7. **`meal_attendance`**: Dining hall check-ins (`id`, `student_id`, `date`, `meal_type`, `status`, `marked_by`).
+8. **`fees`**: Tuition and accommodation billing (`id`, `student_id`, `fee_type`, `amount`, `due_date`, `payment_date`, `payment_status`, `transaction_id`, `payment_method`, `invoice_number`, `academic_semester`, `remarks`).
+9. **`complaints`**: Maintenance service tickets (`id`, `student_id`, `title`, `category`, `description`, `priority`, `status`, `assigned_to`, `resolution_notes`, `image`).
+10. **`complaint_timelines`**: Relational lifecycle audit trail (`id`, `complaint_id`, `status`, `note`, `updated_by`, `updated_at`).
+11. **`announcements`**: Campus broadcasts (`id`, `title`, `message`, `target_audience`, `hostel_id`, `priority`, `created_by`).
+12. **`notifications`**: Resident bell alerts (`id`, `user_id`, `title`, `message`, `type`, `link`, `is_read`).
+13. **`documents`**: Credential verification files (`id`, `student_id`, `document_type`, `file_url`, `original_name`, `file_size`, `status`, `admin_notes`).
 
 ---
 
 ## 🔑 Demo Login Credentials
 
-For demonstration and grading, pre-seeded accounts are provided with 1-click login buttons on both the Landing Page and Login Page:
+Pre-seeded accounts are provided with convenient 1-click login buttons on both the Landing Page and Login Page:
 
-| Role | Email | Password | Access Level |
+| Role | Email | Password | Access Scope |
 | :--- | :--- | :--- | :--- |
-| **ADMIN** | `admin@hostelconnect.com` | `Admin@123` | Institutional Control |
-| **WARDEN** | `warden@hostelconnect.com` | `Warden@123` | Hostel Operations |
-| **STUDENT** | `student@hostelconnect.com` | `Student@123` | Student Resident Hub |
+| **ADMIN** | `admin@hostelconnect.com` | `Admin@123` | Full Institutional Command |
+| **WARDEN** | `warden@hostelconnect.com` | `Warden@123` | Sector Supervision & Allocation |
+| **STUDENT** | `student@hostelconnect.com` | `Student@123` | Resident Accommodation Hub |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-hostel-connect/
-├── client/                     # Frontend React (Vite + Tailwind)
-│   ├── src/
-│   │   ├── components/common/  # Navbar, Sidebar, DashboardCard, Modal, StatusBadge, etc.
-│   │   ├── context/            # AuthContext, NotificationContext
-│   │   ├── layouts/            # DashboardLayout
-│   │   ├── pages/
-│   │   │   ├── auth/           # Login, Register, ForgotPassword
-│   │   │   ├── dashboard/      # AdminDashboard, WardenDashboard, StudentDashboard
-│   │   │   ├── students/       # StudentList, StudentProfile
-│   │   │   ├── rooms/          # RoomManagement, RoomAllocation, MyRoom
-│   │   │   ├── mess/           # MessMenuPage, MealAttendancePage
-│   │   │   ├── fees/           # FeeManagement
-│   │   │   ├── complaints/     # ComplaintList
-│   │   │   ├── announcements/  # AnnouncementsPage
-│   │   │   ├── documents/      # DocumentManagement
-│   │   │   ├── reports/        # ReportsPage
-│   │   │   └── settings/       # SettingsPage
-│   │   ├── services/           # Axios API configuration
-│   │   └── App.jsx
-│   └── package.json
+DBSE/
+├── Hostel_connect/
+│   ├── database/
+│   │   ├── schema.sql           # MySQL 8.0 Schema (13 normalized relational tables)
+│   │   └── sample_data.sql      # Seed data with real bcrypt password hashes
+│   │
+│   ├── client/                  # Frontend React (Vite 5 + Tailwind CSS + Space-Tech UI)
+│   │   ├── src/
+│   │   │   ├── components/common/ # SpaceBackground, LoadingScreen, Modal, StatusBadge, etc.
+│   │   │   ├── context/         # AuthContext, NotificationContext
+│   │   │   ├── layouts/         # DashboardLayout (glassmorphic sidebar + cyber navbar)
+│   │   │   ├── pages/
+│   │   │   │   ├── auth/        # Login, Register, ForgotPassword, ResetPassword
+│   │   │   │   ├── dashboard/   # AdminDashboard, WardenDashboard, StudentDashboard
+│   │   │   │   ├── students/    # StudentList, StudentProfile
+│   │   │   │   ├── rooms/       # RoomManagement, RoomAllocation, MyRoom
+│   │   │   │   ├── mess/        # MessMenuPage, MealAttendancePage
+│   │   │   │   ├── fees/        # FeeManagement
+│   │   │   │   ├── complaints/  # ComplaintList
+│   │   │   │   ├── announcements/ # AnnouncementsPage
+│   │   │   │   ├── documents/   # DocumentManagement
+│   │   │   │   ├── reports/     # ReportsPage
+│   │   │   │   ├── settings/    # SettingsPage
+│   │   │   │   └── LandingPage.jsx
+│   │   │   ├── services/api.js  # Central Axios configuration
+│   │   │   └── index.css        # Cosmic design system tokens & animations
+│   │   └── package.json
+│   │
+│   ├── server/                  # Backend Node.js + Express + MySQL 8.0
+│   │   ├── config/database.js   # mysql2/promise connection pool
+│   │   ├── controllers/         # 12 pure SQL controllers
+│   │   ├── models/              # 12 SQL query model wrappers
+│   │   ├── middleware/          # JWT authMiddleware, errorMiddleware, uploadMiddleware
+│   │   ├── routes/              # Express REST API routes
+│   │   ├── utils/
+│   │   │   ├── mysqlHelper.js   # Dual format helper (id / _id, camelCase joins, transactions)
+│   │   │   └── seeder.js        # Automated SQL schema & seed loader
+│   │   ├── uploads/             # Document storage
+│   │   ├── server.js            # Server bootstrap
+│   │   ├── .env                 # Database & JWT environment variables
+│   │   └── package.json
+│   │
+│   ├── package.json             # Root monorepo scripts
+│   └── README.md
 │
-├── server/                     # Backend Node.js + Express
-│   ├── config/                 # MongoDB connection & memory fallback
-│   ├── controllers/            # Business logic controllers
-│   ├── middleware/             # JWT protect, RBAC authorize, Multer, Error handlers
-│   ├── models/                 # 12 Mongoose Schema models
-│   ├── routes/                 # Express REST route endpoints
-│   ├── utils/                  # Database seeder script
-│   ├── uploads/                # Uploaded attachments & documents
-│   ├── server.js               # Entry point
-│   ├── .env                    # Environment config
-│   └── package.json
-│
-├── package.json                # Root concurrent scripts
-└── README.md
+├── Hostel_connect_backup/       # Safe pre-migration preservation backup
+└── hostel_connect_editable_mysql/ # Source of truth reference
 ```
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Installation & Setup Guide
 
 ### Prerequisites
-- Node.js (v18 or higher, tested on Node v24)
-- npm (v9 or higher)
-- *(Optional)* MongoDB locally or MongoDB Atlas URI (an automatic in-memory MongoDB is built-in if local MongoDB is offline)
+- **Node.js**: v18 or higher (tested on Node v20/v24)
+- **MySQL Server**: 8.0 running on `localhost:3306`
 
-### Step 1: Clone or Navigate to Directory
+---
+
+### Step 1: Initialize the MySQL Database
+
+Import `schema.sql` and `sample_data.sql` into your local MySQL server using the command line:
+
 ```bash
-cd DBSE
+# Navigate to database folder
+cd DBSE/Hostel_connect/database
+
+# 1. Create database and tables
+mysql -u root -p < schema.sql
+
+# 2. Populate sample data (including bcrypt demo credentials)
+mysql -u root -p hostel_connect < sample_data.sql
 ```
 
-### Step 2: Install All Dependencies
-Run from the root directory to install root, backend, and frontend packages:
-```bash
-npm run install:all
-```
-*Or install manually:*
-```bash
-cd server && npm install
-cd ../client && npm install
+*(Alternatively, if running on Windows with default MySQL 8.0 installation path:)*
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p < schema.sql
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p hostel_connect < sample_data.sql
 ```
 
-### Step 3: Environment Variables
-The environment configuration file `server/.env` is pre-configured:
+---
+
+### Step 2: Configure Environment Variables
+
+Inspect `Hostel_connect/server/.env` and update `DB_PASSWORD` if your MySQL root account has a password:
+
 ```env
 PORT=5000
 NODE_ENV=development
-MONGO_URI=mongodb://localhost:27017/hostel_connect
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=hostel_connect
+DB_USER=root
+DB_PASSWORD=your_mysql_password
 JWT_SECRET=hostel_connect_super_secret_jwt_key_2024_secure_and_safe
-JWT_EXPIRE=30d
+JWT_EXPIRES=30d
 CLIENT_URL=http://localhost:5173
 ```
-> **Note**: If you have a MongoDB Atlas connection string, paste it into `MONGO_URI`. If you do not have MongoDB running locally, the server automatically starts an embedded in-memory MongoDB so you can run the app immediately with zero configuration!
-
-### Step 4: Seed Demo Data
-To populate the database with hostels, rooms, students, menus, fees, and complaints:
-```bash
-npm run seed
-```
-
-### Step 5: Start the Full-Stack Application
-Start both client and server concurrently from the root:
-```bash
-npm run dev
-```
-
-*Or start in separate terminals:*
-```bash
-# Terminal 1 - Backend Server
-cd server
-npm run dev
-
-# Terminal 2 - Frontend Client
-cd client
-npm run dev
-```
-
-- **Frontend Application**: `http://localhost:5173`
-- **Backend REST API**: `http://localhost:5000/api/health`
 
 ---
 
-## 🌐 API Endpoints Reference
+### Step 3: Install Dependencies
 
-| Method | Endpoint | Description | Access |
+From the project root:
+```bash
+npm run install:all
+```
+*Or install independently:*
+```bash
+cd Hostel_connect/server && npm install
+cd ../client && npm install
+```
+
+---
+
+### Step 4: Run the Application
+
+Start both the backend server and frontend client concurrently:
+```bash
+# From Hostel_connect/ directory:
+npm run dev
+```
+
+Or run in separate terminals:
+```bash
+# Terminal 1 — Backend (Port 5000)
+cd Hostel_connect/server
+npm run dev
+
+# Terminal 2 — Frontend (Port 5173)
+cd Hostel_connect/client
+npm run dev
+```
+
+- **Frontend Web Application**: [http://localhost:5173](http://localhost:5173)
+- **Backend API Health Check**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
+
+---
+
+## 🌐 Complete REST API Reference
+
+| Method | Endpoint | Description | Role Required |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Student self-registration | Public |
-| `POST` | `/api/auth/login` | User authentication & JWT issuance | Public |
-| `GET` | `/api/auth/me` | Fetch authenticated profile | Private |
-| `GET` | `/api/students` | List all students (search, filter, pagination) | Admin / Warden |
-| `POST` | `/api/students` | Create new student | Admin |
-| `GET` | `/api/students/:id` | Get student profile dossier | Private |
-| `GET` | `/api/hostels` | List hostels with capacity metrics | Public / Private |
-| `POST` | `/api/hostels` | Create new hostel | Admin |
-| `GET` | `/api/rooms` | Query rooms & availability matrix | Private |
-| `POST` | `/api/rooms` | Create new room | Admin / Warden |
-| `POST` | `/api/allocations` | Allocate student to available bed | Admin / Warden |
-| `PUT` | `/api/allocations/:id` | Transfer student to new room | Admin / Warden |
-| `DELETE`| `/api/allocations/:id` | Vacate student / release bed | Admin / Warden |
-| `GET` | `/api/mess/menu` | Fetch weekly & today's mess menu | Public / Private |
-| `POST` | `/api/mess/menu` | Create or update menu slot | Admin / Warden |
-| `POST` | `/api/mess/attendance` | Check-in student meal attendance | Admin / Warden |
-| `GET` | `/api/fees` | List fee invoices with summaries | Private |
-| `POST` | `/api/fees` | Issue fee bills (single or all students) | Admin |
-| `PUT` | `/api/fees/:id` | Pay invoice / update status | Private |
-| `GET` | `/api/fees/:id/receipt` | Get printable receipt data | Private |
-| `GET` | `/api/complaints` | Query complaints with filters | Private |
-| `POST` | `/api/complaints` | Submit maintenance complaint | Private |
-| `PUT` | `/api/complaints/:id` | Update status, assign staff, notes | Admin / Warden |
-| `GET` | `/api/announcements` | Fetch targeted notice feed | Private |
-| `POST` | `/api/announcements` | Broadcast announcement | Admin / Warden |
-| `GET` | `/api/notifications` | Fetch user alerts & unread count | Private |
-| `POST` | `/api/documents/upload` | Upload verification document | Private |
-| `PUT` | `/api/documents/:id/status` | Approve / Reject document | Admin / Warden |
+| `POST` | `/api/auth/login` | JWT authentication & profile payload | Public |
+| `GET` | `/api/auth/me` | Authenticated user profile | Any Authenticated |
+| `PUT` | `/api/auth/profile` | Update profile information | Any Authenticated |
+| `PUT` | `/api/auth/change-password` | Update user password | Any Authenticated |
+| `GET` | `/api/students` | List students with search, filters & pagination | Admin, Warden |
+| `POST` | `/api/students` | Create new student profile | Admin |
+| `GET` | `/api/students/:id` | Detailed student profile dossier | Any Authenticated |
+| `PUT` | `/api/students/:id` | Update student profile | Admin, Warden |
+| `DELETE`| `/api/students/:id` | Delete student profile | Admin |
+| `GET` | `/api/hostels` | List hostels with occupancy & room counts | Any Authenticated |
+| `POST` | `/api/hostels` | Create new hostel sector | Admin |
+| `PUT` | `/api/hostels/:id` | Update hostel configuration | Admin |
+| `DELETE`| `/api/hostels/:id` | Delete hostel | Admin |
+| `GET` | `/api/rooms` | Query rooms, occupancy & filters | Any Authenticated |
+| `POST` | `/api/rooms` | Create new room | Admin, Warden |
+| `PUT` | `/api/rooms/:id` | Update room details | Admin, Warden |
+| `DELETE`| `/api/rooms/:id` | Delete room | Admin |
+| `GET` | `/api/allocations` | List room allocations | Admin, Warden |
+| `POST` | `/api/allocations` | Allocate student to available bed | Admin, Warden |
+| `PUT` | `/api/allocations/:id` | Transfer student to new room | Admin, Warden |
+| `DELETE`| `/api/allocations/:id` | Vacate student & release bed | Admin, Warden |
+| `GET` | `/api/mess/menu` | Fetch weekly & current day mess menu | Any Authenticated |
+| `POST` | `/api/mess/menu` | Create or update menu slot | Admin, Warden |
+| `GET` | `/api/mess/attendance` | Query meal attendance records | Any Authenticated |
+| `POST` | `/api/mess/attendance` | Check-in student meal attendance | Admin, Warden |
+| `GET` | `/api/mess/stats` | Meal analytics & breakdown counts | Admin, Warden |
+| `GET` | `/api/fees` | List invoices with financial totals | Any Authenticated |
+| `POST` | `/api/fees` | Issue fee bills (single or bulk) | Admin |
+| `PUT` | `/api/fees/:id` | Simulate payment & record transaction | Any Authenticated |
+| `GET` | `/api/fees/:id/receipt`| Fetch digital receipt data | Any Authenticated |
+| `GET` | `/api/complaints` | Query complaints with category/status filters | Any Authenticated |
+| `POST` | `/api/complaints` | Submit maintenance ticket | Student |
+| `PUT` | `/api/complaints/:id` | Update complaint status & notes | Admin, Warden |
+| `GET` | `/api/announcements` | Fetch targeted broadcast feed | Any Authenticated |
+| `POST` | `/api/announcements` | Publish new announcement | Admin, Warden |
+| `DELETE`| `/api/announcements/:id`| Delete announcement | Admin, Warden |
+| `GET` | `/api/notifications` | Fetch user alerts & unread counter | Any Authenticated |
+| `PUT` | `/api/notifications/:id/read`| Mark notification as read | Any Authenticated |
+| `GET` | `/api/documents` | List uploaded verification documents | Any Authenticated |
+| `POST` | `/api/documents/upload` | Upload resident identity document | Any Authenticated |
+| `PUT` | `/api/documents/:id/status`| Approve or reject document | Admin, Warden |
 | `GET` | `/api/dashboard/admin` | Admin KPI metrics & chart analytics | Admin |
-| `GET` | `/api/dashboard/warden` | Warden hostel oversight metrics | Admin / Warden |
-| `GET` | `/api/dashboard/student` | Student dashboard summary | Student |
-| `GET` | `/api/dashboard/reports` | Aggregated reports with CSV export | Admin / Warden |
+| `GET` | `/api/dashboard/warden` | Warden sector oversight metrics | Warden |
+| `GET` | `/api/dashboard/student` | Student resident dashboard overview | Student |
+| `GET` | `/api/dashboard/reports` | Aggregated report tables with CSV export | Admin, Warden |
 
 ---
 
-## 🔒 Security & Best Practices
-- **Password Protection**: bcryptjs salt hashing (10 rounds).
-- **Session Tokens**: Cryptographically signed JSON Web Tokens (JWT) with authorization header interceptors.
-- **Role-Based Guards**: Protected backend routes with express middleware checking `req.user.role`.
-- **Occupancy Integrity**: Strict validation preventing room allocation beyond maximum bed capacity.
+## 🔒 Security & Performance Features
+- **ACID Transactions**: Room allocations, student room changes, bed deallocations, and invoice reconciliations execute in atomic transactions (`BEGIN`, `COMMIT`, `ROLLBACK`).
+- **Cryptographic Password Protection**: bcryptjs salt hashing with 10 iterations.
+- **Dual-Field Compatibility**: Backend responses provide both `id` and `_id`, plus camelCase join properties to ensure zero breaking changes across frontend components.
+- **Reduced Motion Support**: All canvas particle animations and glowing UI transitions respect `@media (prefers-reduced-motion: reduce)`.

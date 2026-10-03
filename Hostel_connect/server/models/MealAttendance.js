@@ -1,39 +1,11 @@
-import mongoose from 'mongoose';
+import pool from '../config/database.js';
+import { formatMealAttendance } from '../utils/mysqlHelper.js';
 
-const mealAttendanceSchema = new mongoose.Schema(
-  {
-    studentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true,
-    },
-    date: {
-      type: String, // YYYY-MM-DD format for straightforward daily queries
-      required: true,
-    },
-    mealType: {
-      type: String,
-      enum: ['Breakfast', 'Lunch', 'Dinner', 'Snacks'],
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ['Present', 'Absent'],
-      default: 'Present',
-    },
-    markedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+export const tableName = 'meal_attendance';
 
-// One attendance record per student per date per mealType
-mealAttendanceSchema.index({ studentId: 1, date: 1, mealType: 1 }, { unique: true });
+export const findById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM meal_attendance WHERE id = ?', [id]);
+  return rows.length ? formatMealAttendance(rows[0]) : null;
+};
 
-const MealAttendance = mongoose.model('MealAttendance', mealAttendanceSchema);
-export default MealAttendance;
+export default { tableName, findById };

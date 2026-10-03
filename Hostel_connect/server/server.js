@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { connectDB } from './config/db.js';
+import pool, { testConnection } from './config/database.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 // Route Imports
@@ -21,10 +21,10 @@ import announcementRoutes from './routes/announcementRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
-
-// Auto-seed helper
-import User from './models/User.js';
-import { seedDatabase } from './utils/seeder.js';
+import messFeedbackRoutes from './routes/messFeedbackRoutes.js';
+import hygieneRoutes from './routes/hygieneRoutes.js';
+import parcelRoutes from './routes/parcelRoutes.js';
+import visitorRoutes from './routes/visitorRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,25 +33,28 @@ dotenv.config();
 
 const app = express();
 
-// Connect Database
-await connectDB();
+// Test MySQL Database Connection
+await testConnection();
 
-// Auto-seed if empty database
-try {
-  const userCount = await User.countDocuments();
-  if (userCount === 0) {
-    console.log('[Bootstrap] No existing users found. Auto-seeding initial demo data...');
-    await seedDatabase();
-  }
-} catch (seedErr) {
-  console.warn('[Bootstrap] Auto-seed check skipped or encountered note:', seedErr.message);
-}
+// CORS Configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
 
-// Middleware
 app.use(cors({
-  origin: '*', // Allow Vite client during dev
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, or Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Permissive during local development
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -63,12 +66,23 @@ if (process.env.NODE_ENV !== 'production') {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health Check API
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'disconnected';
+  try {
+    const [result] = await pool.query('SELECT 1 as isAlive');
+    if (result && result[0]?.isAlive === 1) {
+      dbStatus = 'connected';
+    }
+  } catch (e) {
+    dbStatus = 'error: ' + e.message;
+  }
+
   res.status(200).json({
     status: 'online',
-    system: 'Hostel Connect API',
+    system: 'Hostel Connect API (MySQL)',
+    database: dbStatus,
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
+    uptime: `${Math.floor(process.uptime())}s`,
   });
 });
 
@@ -85,22 +99,19 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/mess-feedback', messFeedbackRoutes);
+app.use('/api/hygiene', hygieneRoutes);
+app.use('/api/parcels', parcelRoutes);
+app.use('/api/visitors', visitorRoutes);
 
-// Error Middlewares
+// Error Handling Middleware
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 HOSTEL CONNECT Server is running on port ${PORT}`);
-  console.log(`📡 REST API Endpoint: http://localhost:${PORT}/api/health`);
-  console.log(`====================================================`);
-});
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error(`Unhandled Rejection: ${err.message}`);
+app.listen(PORT, () => {
+  console.log(`[Hostel Connect] Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`[Hostel Connect] API Base URL: http://localhost:${PORT}/api`);
+  console.log(`[Hostel Connect] Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
 });
-
-export default app;

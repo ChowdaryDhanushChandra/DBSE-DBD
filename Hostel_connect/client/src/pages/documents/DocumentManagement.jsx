@@ -106,17 +106,20 @@ const DocumentManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <FileText className="w-6 h-6" />
+            </span>
             Document Verification Desk
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Student identity documents, admission certificates, and administrative approvals
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            Resident identity credentials, admission certificates, and administrative approvals
           </p>
         </div>
 
         <button
           onClick={() => setUploadModal(true)}
-          className="inline-flex items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-indigo-200 transition-all self-start sm:self-auto"
+          className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl shadow-neon-cyan transition-all self-start sm:self-auto"
         >
           <Upload className="w-4 h-4 mr-1.5" />
           Upload Document
@@ -124,7 +127,7 @@ const DocumentManagement = () => {
       </div>
 
       {/* Documents Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
+      <div className="bg-[#070D22]/80 backdrop-blur-md rounded-2xl border border-cyan-500/15 shadow-glass overflow-hidden">
         {loading ? (
           <LoadingSpinner size="md" message="Loading documents..." />
         ) : documents.length === 0 ? (
@@ -137,8 +140,8 @@ const DocumentManagement = () => {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+            <table className="w-full text-left text-xs text-zinc-300">
+              <thead className="bg-[#050816]/90 text-cyan-300 font-bold uppercase tracking-wider text-[11px] border-b border-cyan-500/20">
                 <tr>
                   <th className="px-5 py-3.5">Document Type</th>
                   {!isStudent && <th className="px-5 py-3.5">Student</th>}
@@ -149,63 +152,69 @@ const DocumentManagement = () => {
                   <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {documents.map((doc) => (
-                  <tr key={doc._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-3.5 font-bold text-slate-900">{doc.documentType}</td>
+              <tbody className="divide-y divide-cyan-500/10">
+                {documents.map((doc) => {
+                  const docKey = doc._id || doc.id;
+                  const stName = doc.studentId?.userId?.name || doc.studentName || 'Student';
+                  const stId = doc.studentId?.studentId || doc.studentIdentifier;
 
-                    {!isStudent && (
-                      <td className="px-5 py-3.5">
-                        <p className="font-semibold text-slate-800">{doc.studentId?.userId?.name || 'Student'}</p>
-                        <p className="text-[11px] text-slate-400">{doc.studentId?.studentId}</p>
-                      </td>
-                    )}
+                  return (
+                    <tr key={docKey} className="hover:bg-cyan-500/5 transition-colors">
+                      <td className="px-5 py-3.5 font-bold text-white">{doc.documentType}</td>
 
-                    <td className="px-5 py-3.5 text-slate-600 max-w-xs truncate">
-                      {doc.originalName || 'Attached Document'}
-                    </td>
-
-                    <td className="px-5 py-3.5 text-slate-500">
-                      {new Date(doc.createdAt).toLocaleDateString()}
-                    </td>
-
-                    <td className="px-5 py-3.5">
-                      <StatusBadge status={doc.status} />
-                    </td>
-
-                    <td className="px-5 py-3.5 text-slate-500 text-[11px]">
-                      {doc.adminNotes || '-'}
-                    </td>
-
-                    <td className="px-5 py-3.5 text-right space-x-2">
-                      <a
-                        href={doc.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-xs font-semibold inline-flex items-center"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                        View
-                      </a>
-
-                      {(isAdmin || isWarden) && (
-                        <button
-                          onClick={() => {
-                            setSelectedDoc(doc);
-                            setReviewForm({
-                              status: doc.status === 'Pending' ? 'Approved' : doc.status,
-                              adminNotes: doc.adminNotes || '',
-                            });
-                            setReviewModal(true);
-                          }}
-                          className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold inline-flex items-center shadow-sm"
-                        >
-                          Review
-                        </button>
+                      {!isStudent && (
+                        <td className="px-5 py-3.5">
+                          <p className="font-semibold text-white">{stName}</p>
+                          <p className="text-[11px] text-zinc-400">{stId}</p>
+                        </td>
                       )}
-                    </td>
-                  </tr>
-                ))}
+
+                      <td className="px-5 py-3.5 text-zinc-400 max-w-xs truncate">
+                        {doc.originalName || 'Attached Document'}
+                      </td>
+
+                      <td className="px-5 py-3.5 text-zinc-400">
+                        {new Date(doc.createdAt).toLocaleDateString()}
+                      </td>
+
+                      <td className="px-5 py-3.5">
+                        <StatusBadge status={doc.status} />
+                      </td>
+
+                      <td className="px-5 py-3.5 text-zinc-400 text-[11px]">
+                        {doc.adminNotes || '-'}
+                      </td>
+
+                      <td className="px-5 py-3.5 text-right space-x-2">
+                        <a
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 bg-[#050816] text-zinc-300 hover:text-cyan-300 border border-cyan-500/20 rounded-lg text-xs font-semibold inline-flex items-center transition-colors hover:border-cyan-500/40"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                          View
+                        </a>
+
+                        {(isAdmin || isWarden) && (
+                          <button
+                            onClick={() => {
+                              setSelectedDoc(doc);
+                              setReviewForm({
+                                status: doc.status === 'Pending' ? 'Approved' : doc.status,
+                                adminNotes: doc.adminNotes || '',
+                              });
+                              setReviewModal(true);
+                            }}
+                            className="px-2.5 py-1 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-lg text-xs font-semibold inline-flex items-center shadow-neon-cyan transition-all"
+                          >
+                            Review
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -221,11 +230,11 @@ const DocumentManagement = () => {
       >
         <form onSubmit={handleUploadSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Document Category *</label>
+            <label className="block font-bold text-zinc-300 mb-1">Document Category *</label>
             <select
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             >
               {docTypes.map((dt) => (
                 <option key={dt} value={dt}>{dt}</option>
@@ -234,28 +243,28 @@ const DocumentManagement = () => {
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Select File (PDF, PNG, JPG) *</label>
+            <label className="block font-bold text-zinc-300 mb-1">Select File (PDF, PNG, JPG) *</label>
             <input
               type="file"
               required
               accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
               onChange={(e) => setFile(e.target.files[0])}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 file:bg-cyan-500/10 file:border-0 file:text-cyan-300 file:rounded-lg file:mr-2 file:px-2 file:py-1 file:font-semibold"
             />
           </div>
 
-          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-cyan-500/10">
             <button
               type="button"
               onClick={() => setUploadModal(false)}
-              className="px-4 py-2 bg-slate-100 rounded-xl font-semibold text-slate-600"
+              className="px-4 py-2 bg-[#050816] hover:bg-zinc-800 rounded-xl font-semibold text-zinc-300 border border-zinc-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={uploading}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-200 disabled:opacity-50"
+              className="px-5 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl font-bold shadow-neon-cyan disabled:opacity-50 transition-all"
             >
               {uploading ? 'Uploading...' : 'Upload File'}
             </button>
@@ -271,17 +280,19 @@ const DocumentManagement = () => {
         maxWidth="max-w-md"
       >
         <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-slate-600">
-            <p className="font-semibold text-slate-800">Student:</p>
-            <p>{selectedDoc?.studentId?.userId?.name} ({selectedDoc?.studentId?.studentId})</p>
+          <div className="p-3 bg-[#050816] rounded-xl border border-cyan-500/20 text-zinc-400">
+            <p className="font-semibold text-white">Student:</p>
+            <p className="text-cyan-400">
+              {selectedDoc?.studentId?.userId?.name || selectedDoc?.studentName} ({selectedDoc?.studentId?.studentId || selectedDoc?.studentIdentifier})
+            </p>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Verification Status</label>
+            <label className="block font-bold text-zinc-300 mb-1">Verification Status</label>
             <select
               value={reviewForm.status}
               onChange={(e) => setReviewForm({ ...reviewForm, status: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             >
               <option value="Approved">Approved (Valid Document)</option>
               <option value="Rejected">Rejected (Resubmission Needed)</option>
@@ -290,28 +301,28 @@ const DocumentManagement = () => {
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Administrative Feedback / Notes</label>
+            <label className="block font-bold text-zinc-300 mb-1">Administrative Feedback / Notes</label>
             <textarea
               rows="3"
               value={reviewForm.adminNotes}
               onChange={(e) => setReviewForm({ ...reviewForm, adminNotes: e.target.value })}
               placeholder="e.g. Identity verified against registrar database or reason for rejection"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
-          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-cyan-500/10">
             <button
               type="button"
               onClick={() => setReviewModal(false)}
-              className="px-4 py-2 bg-slate-100 rounded-xl font-semibold text-slate-600"
+              className="px-4 py-2 bg-[#050816] hover:bg-zinc-800 rounded-xl font-semibold text-zinc-300 border border-zinc-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submittingReview}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-200 disabled:opacity-50"
+              className="px-5 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl font-bold shadow-neon-cyan disabled:opacity-50 transition-all"
             >
               {submittingReview ? 'Saving...' : 'Update Status'}
             </button>

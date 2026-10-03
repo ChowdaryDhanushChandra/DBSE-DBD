@@ -60,10 +60,18 @@ const MessMenuPage = () => {
 
   const handleOpenEdit = (mealType) => {
     const existing = weeklyMenu.find((m) => m.dayOfWeek === selectedDay && m.mealType === mealType);
+    let itemsStr = '';
+    if (existing) {
+      if (Array.isArray(existing.foodItems)) {
+        itemsStr = existing.foodItems.join(', ');
+      } else if (typeof existing.foodItems === 'string') {
+        itemsStr = existing.foodItems;
+      }
+    }
     setMenuForm({
       dayOfWeek: selectedDay,
       mealType,
-      foodItems: existing ? existing.foodItems.join(', ') : '',
+      foodItems: itemsStr,
       category: existing ? existing.category : 'Vegetarian',
       calories: existing ? existing.calories : 500,
       timing: existing
@@ -102,8 +110,13 @@ const MessMenuPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Weekly Mess Menu</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <UtensilsCrossed className="w-6 h-6" />
+            </span>
+            Weekly Mess Menu
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
             Institutional dining schedule, dietary nutrition, and daily meal plans
           </p>
         </div>
@@ -111,7 +124,7 @@ const MessMenuPage = () => {
         {(isAdmin || isWarden) && (
           <button
             onClick={() => handleOpenEdit('Breakfast')}
-            className="inline-flex items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-indigo-200 transition-all self-start sm:self-auto"
+            className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl shadow-neon-cyan transition-all self-start sm:self-auto"
           >
             <Plus className="w-4 h-4 mr-1.5" />
             Update Meal Plan
@@ -120,7 +133,7 @@ const MessMenuPage = () => {
       </div>
 
       {/* Days Selector Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-cyan-500/10 pb-2">
         {days.map((day) => {
           const isToday = day === currentDay;
           const isSelected = day === selectedDay;
@@ -130,15 +143,15 @@ const MessMenuPage = () => {
               onClick={() => setSelectedDay(day)}
               className={`relative px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 isSelected
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-neon-cyan'
+                  : 'bg-[#070D22]/80 text-zinc-400 hover:bg-cyan-500/10 hover:text-cyan-300 border border-cyan-500/15'
               }`}
             >
               <span>{day}</span>
               {isToday && (
                 <span
                   className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase ${
-                    isSelected ? 'bg-white text-indigo-700' : 'bg-indigo-100 text-indigo-700'
+                    isSelected ? 'bg-white text-purple-900' : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                   }`}
                 >
                   Today
@@ -156,28 +169,34 @@ const MessMenuPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {['Breakfast', 'Lunch', 'Dinner'].map((mealType) => {
             const slot = dayMeals.find((m) => m.mealType === mealType);
+            const items = Array.isArray(slot?.foodItems)
+              ? slot.foodItems
+              : typeof slot?.foodItems === 'string'
+              ? slot.foodItems.split(',').map((s) => s.trim()).filter(Boolean)
+              : [];
+
             return (
               <div
                 key={mealType}
-                className="bg-white rounded-3xl p-6 border border-slate-100 shadow-card flex flex-col justify-between"
+                className="bg-[#070D22]/80 backdrop-blur-md rounded-3xl p-6 border border-cyan-500/15 shadow-glass flex flex-col justify-between hover:border-cyan-500/30 transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2.5">
-                      <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
+                      <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                         <UtensilsCrossed className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-base font-extrabold text-slate-900">{mealType}</h3>
-                        <p className="text-[11px] text-slate-400 flex items-center mt-0.5">
-                          <Clock className="w-3 h-3 mr-1 text-slate-400" />
+                        <h3 className="text-base font-extrabold text-white">{mealType}</h3>
+                        <p className="text-[11px] text-zinc-400 flex items-center mt-0.5">
+                          <Clock className="w-3 h-3 mr-1 text-cyan-400/70" />
                           {slot?.timing || 'Standard Timing'}
                         </p>
                       </div>
                     </div>
 
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 flex items-center">
-                      <Flame className="w-3 h-3 mr-1 text-amber-500" />
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#050816] text-amber-400 border border-amber-500/30 flex items-center shadow-[0_0_8px_rgba(245,158,11,0.15)]">
+                      <Flame className="w-3 h-3 mr-1 text-amber-400" />
                       {slot?.calories || 500} kcal
                     </span>
                   </div>
@@ -186,10 +205,10 @@ const MessMenuPage = () => {
                     <span
                       className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         slot?.category === 'Non-Vegetarian'
-                          ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                           : slot?.category === 'Both'
-                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                          : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
                       }`}
                     >
                       {slot?.category || 'Vegetarian'}
@@ -197,34 +216,34 @@ const MessMenuPage = () => {
                   </div>
 
                   {slot?.description && (
-                    <p className="text-xs text-slate-500 italic mb-4">{slot.description}</p>
+                    <p className="text-xs text-zinc-400 italic mb-4">{slot.description}</p>
                   )}
 
                   {/* Food Items */}
-                  <div className="space-y-2 border-t border-slate-100 pt-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="space-y-2 border-t border-cyan-500/10 pt-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/80">
                       Menu Offerings
                     </p>
-                    {slot?.foodItems && slot.foodItems.length > 0 ? (
-                      <ul className="space-y-2 text-xs text-slate-700">
-                        {slot.foodItems.map((item, idx) => (
+                    {items.length > 0 ? (
+                      <ul className="space-y-2 text-xs text-zinc-300">
+                        {items.map((item, idx) => (
                           <li key={idx} className="flex items-center space-x-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 shadow-[0_0_6px_rgba(0,229,255,0.6)]" />
                             <span className="font-semibold">{item}</span>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-xs text-slate-400 italic">No menu registered for this slot.</p>
+                      <p className="text-xs text-zinc-500 italic">No menu registered for this slot.</p>
                     )}
                   </div>
                 </div>
 
                 {(isAdmin || isWarden) && (
-                  <div className="mt-6 pt-3 border-t border-slate-100 flex justify-end">
+                  <div className="mt-6 pt-3 border-t border-cyan-500/10 flex justify-end">
                     <button
                       onClick={() => handleOpenEdit(mealType)}
-                      className="inline-flex items-center text-xs font-bold text-indigo-600 hover:text-indigo-700"
+                      className="inline-flex items-center text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
                     >
                       <Edit2 className="w-3.5 h-3.5 mr-1" />
                       Edit Slot
@@ -247,11 +266,11 @@ const MessMenuPage = () => {
         <form onSubmit={handleMenuSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Day of Week</label>
+              <label className="block font-bold text-zinc-300 mb-1">Day of Week</label>
               <select
                 value={menuForm.dayOfWeek}
                 onChange={(e) => setMenuForm({ ...menuForm, dayOfWeek: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               >
                 {days.map((d) => (
                   <option key={d} value={d}>{d}</option>
@@ -259,11 +278,11 @@ const MessMenuPage = () => {
               </select>
             </div>
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Meal Type</label>
+              <label className="block font-bold text-zinc-300 mb-1">Meal Type</label>
               <select
                 value={menuForm.mealType}
                 onChange={(e) => setMenuForm({ ...menuForm, mealType: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               >
                 <option value="Breakfast">Breakfast</option>
                 <option value="Lunch">Lunch</option>
@@ -274,7 +293,7 @@ const MessMenuPage = () => {
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">
+            <label className="block font-bold text-zinc-300 mb-1">
               Food Items (comma-separated) *
             </label>
             <textarea
@@ -283,17 +302,17 @@ const MessMenuPage = () => {
               value={menuForm.foodItems}
               onChange={(e) => setMenuForm({ ...menuForm, foodItems: e.target.value })}
               placeholder="e.g. Idli & Sambar, Coconut Chutney, Filter Coffee, Boiled Eggs"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Category</label>
+              <label className="block font-bold text-zinc-300 mb-1">Category</label>
               <select
                 value={menuForm.category}
                 onChange={(e) => setMenuForm({ ...menuForm, category: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white rounded-xl font-medium focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               >
                 <option value="Vegetarian">Vegetarian</option>
                 <option value="Non-Vegetarian">Non-Vegetarian</option>
@@ -302,50 +321,50 @@ const MessMenuPage = () => {
               </select>
             </div>
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Estimated Calories (kcal)</label>
+              <label className="block font-bold text-zinc-300 mb-1">Estimated Calories (kcal)</label>
               <input
                 type="number"
                 value={menuForm.calories}
                 onChange={(e) => setMenuForm({ ...menuForm, calories: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+                className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Serving Timings</label>
+            <label className="block font-bold text-zinc-300 mb-1">Serving Timings</label>
             <input
               type="text"
               value={menuForm.timing}
               onChange={(e) => setMenuForm({ ...menuForm, timing: e.target.value })}
               placeholder="e.g. 07:30 AM - 09:30 AM"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Description / Chef Note</label>
+            <label className="block font-bold text-zinc-300 mb-1">Description / Chef Note</label>
             <input
               type="text"
               value={menuForm.description}
               onChange={(e) => setMenuForm({ ...menuForm, description: e.target.value })}
               placeholder="e.g. High protein breakfast with fresh fruit"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-3 py-2 bg-[#050816] border border-cyan-500/20 text-white placeholder-zinc-500 rounded-xl focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
             />
           </div>
 
-          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-cyan-500/10">
             <button
               type="button"
               onClick={() => setMenuModal(false)}
-              className="px-4 py-2 bg-slate-100 rounded-xl font-semibold text-slate-600"
+              className="px-4 py-2 bg-[#050816] hover:bg-zinc-800 rounded-xl font-semibold text-zinc-300 border border-zinc-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-200 disabled:opacity-50"
+              className="px-5 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white rounded-xl font-bold shadow-neon-cyan disabled:opacity-50 transition-all"
             >
               {submitting ? 'Saving...' : 'Save Menu'}
             </button>

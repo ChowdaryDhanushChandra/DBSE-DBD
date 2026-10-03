@@ -1,8 +1,5 @@
-import Allocation from '../models/Allocation.js';
-import Room from '../models/Room.js';
-import Student from '../models/Student.js';
-import Hostel from '../models/Hostel.js';
-import Notification from '../models/Notification.js';
+import pool from '../config/database.js';
+import { formatAllocation, withTransaction } from '../utils/mysqlHelper.js';
 
 // @desc    Get all allocations
 // @route   GET /api/allocations
@@ -10,20 +7,39 @@ import Notification from '../models/Notification.js';
 export const getAllocations = async (req, res, next) => {
   try {
     const { status, hostelId, studentId } = req.query;
-    const query = {};
 
-    if (status) query.status = status;
-    if (hostelId) query.hostelId = hostelId;
-    if (studentId) query.studentId = studentId;
+    let sql = `
+      SELECT a.*,
+             h.name AS hostel_name, h.location AS hostel_location,
+             r.room_number, r.floor_number, r.room_type, r.capacity, r.current_occupancy,
+             s.student_id AS student_roll, s.course, s.department,
+             u.id AS user_id, u.name AS student_name, u.email AS student_email
+      FROM allocations a
+      JOIN students s ON a.student_id = s.id
+      JOIN users u ON s.user_id = u.id
+      JOIN hostels h ON a.hostel_id = h.id
+      JOIN rooms r ON a.room_id = r.id
+      WHERE 1=1
+    `;
+    const params = [];
 
-    const allocations = await Allocation.find(query)
-      .populate({
-        path: 'studentId',
-        populate: { path: 'userId', select: 'name email phone' },
-      })
-      .populate('hostelId', 'name location gender')
-      .populate('roomId', 'roomNumber floor roomType capacity currentOccupancy')
-      .sort({ allocationDate: -1 });
+    if (status) {
+      sql += ' AND a.status = ?';
+      params.push(status);
+    }
+    if (hostelId) {
+      sql += ' AND a.hostel_id = ?';
+      params.push(hostelId);
+    }
+    if (studentId) {
+      sql += ' AND a.student_id = ?';
+      params.push(studentId);
+    }
+
+    sql += ' ORDER BY a.allocation_date DESC';
+
+    const [rows] = await pool.execute(sql, params);
+    const allocations = rows.map(formatAllocation);
 
     res.status(200).json({
       success: true,
@@ -42,31 +58,27 @@ export const allocateRoom = async (req, res, next) => {
   try {
     const { studentId, hostelId, roomId, remarks } = req.body;
 
-    const student = await Student.findById(studentId);
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: 'Student not found',
-      });
+    const [students] = await pool.execute(
+      'SELECT s.*, u.id AS user_id FROM students s JOIN users u ON s.user_id = u.id WHERE s.id = ?',
+      [studentId]
+    );
+    if (!students.length) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
     }
+    const student = students[0];
 
-    const room = await Room.findById(roomId);
-    if (!room) {
-      return res.status(404).json({
-        success: false,
-        message: 'Room not found',
-      });
+    const [rooms] = await pool.execute('SELECT * FROM rooms WHERE id = ?', [roomId]);
+    if (!rooms.length) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
     }
+    const room = rooms[0];
 
-    const hostel = await Hostel.findById(hostelId);
-    if (!hostel) {
-      return res.status(404).json({
-        success: false,
-        message: 'Hostel not found',
-      });
+    const [hostels] = await pool.execute('SELECT * FROM hostels WHERE id = ?', [hostelId]);
+    if (!hostels.length) {
+      return res.status(404).json({ success: false, message: 'Hostel not found' });
     }
+    const hostel = hostels[0];
 
-    // Check room status & capacity
     if (room.status === 'Maintenance') {
       return res.status(400).json({
         success: false,
@@ -74,75 +86,82 @@ export const allocateRoom = async (req, res, next) => {
       });
     }
 
-    if (room.currentOccupancy >= room.capacity) {
+    if (room.current_occupancy >= room.capacity) {
       return res.status(400).json({
         success: false,
-        message: `Room ${room.roomNumber} is fully occupied (${room.currentOccupancy}/${room.capacity}).`,
+        message: `Room ${room.room_number} is fully occupied (${room.current_occupancy}/${room.capacity}).`,
       });
     }
 
-    // Check gender matching
+    // Gender check
     if (hostel.gender !== 'Co-ed') {
       if (hostel.gender === 'Boys' && student.gender !== 'Male') {
-        return res.status(400).json({
-          success: false,
-          message: 'Cannot allocate non-male student to Boys Hostel.',
-        });
+        return res.status(400).json({ success: false, message: 'Cannot allocate non-male student to Boys Hostel.' });
       }
       if (hostel.gender === 'Girls' && student.gender !== 'Female') {
-        return res.status(400).json({
-          success: false,
-          message: 'Cannot allocate non-female student to Girls Hostel.',
-        });
+        return res.status(400).json({ success: false, message: 'Cannot allocate non-female student to Girls Hostel.' });
       }
     }
 
-    // If student already has an active room, handle transfer or deallocate old room
-    if (student.roomId) {
-      const oldRoom = await Room.findById(student.roomId);
-      if (oldRoom && oldRoom.currentOccupancy > 0) {
-        oldRoom.currentOccupancy -= 1;
-        await oldRoom.save();
+    const allocationId = await withTransaction(async (conn) => {
+      // If student was already in a room, decrement that room
+      if (student.room_id) {
+        const [oldRooms] = await conn.execute('SELECT * FROM rooms WHERE id = ?', [student.room_id]);
+        if (oldRooms.length && oldRooms[0].current_occupancy > 0) {
+          const oldOcc = oldRooms[0].current_occupancy - 1;
+          const oldStat = oldOcc === 0 ? 'Available' : 'Partially Occupied';
+          await conn.execute('UPDATE rooms SET current_occupancy = ?, status = ? WHERE id = ?', [oldOcc, oldStat, student.room_id]);
+        }
+
+        await conn.execute(
+          "UPDATE allocations SET status = 'Transferred', vacate_date = CURDATE() WHERE student_id = ? AND status = 'Active'",
+          [student.id]
+        );
       }
 
-      await Allocation.updateMany(
-        { studentId: student._id, status: 'Active' },
-        { status: 'Transferred', vacateDate: new Date() }
+      // Increment new room
+      const newOcc = room.current_occupancy + 1;
+      const newStat = newOcc >= room.capacity ? 'Fully Occupied' : 'Partially Occupied';
+      await conn.execute('UPDATE rooms SET current_occupancy = ?, status = ? WHERE id = ?', [newOcc, newStat, room.id]);
+
+      // Update student record
+      await conn.execute('UPDATE students SET hostel_id = ?, room_id = ? WHERE id = ?', [hostelId, roomId, student.id]);
+
+      // Create allocation record
+      const [allocResult] = await conn.execute(
+        `INSERT INTO allocations (student_id, hostel_id, room_id, allocation_date, status, remarks)
+         VALUES (?, ?, ?, CURDATE(), 'Active', ?)`,
+        [student.id, hostelId, roomId, remarks || 'Allocated by administration']
       );
-    }
 
-    // Update room occupancy
-    room.currentOccupancy += 1;
-    await room.save();
+      // Notification
+      await conn.execute(
+        `INSERT INTO notifications (user_id, title, message, type, link)
+         VALUES (?, ?, ?, 'room', '/student/my-room')`,
+        [student.user_id, 'Room Allocated!', `You have been allocated Room ${room.room_number} in ${hostel.name}.`]
+      );
 
-    // Update student
-    student.hostelId = hostelId;
-    student.roomId = roomId;
-    await student.save();
-
-    // Create allocation record
-    const allocation = await Allocation.create({
-      studentId: student._id,
-      hostelId,
-      roomId,
-      allocationDate: new Date(),
-      status: 'Active',
-      remarks: remarks || 'Allocated by administration',
+      return allocResult.insertId;
     });
 
-    // Notify student
-    await Notification.create({
-      userId: student.userId,
-      title: 'Room Allocated!',
-      message: `You have been allocated Room ${room.roomNumber} in ${hostel.name}.`,
-      type: 'room',
-      link: '/student/my-room',
-    });
+    const [createdRows] = await pool.execute(`
+      SELECT a.*,
+             h.name AS hostel_name, h.location AS hostel_location,
+             r.room_number, r.floor_number, r.room_type, r.capacity, r.current_occupancy,
+             s.student_id AS student_roll, s.course, s.department,
+             u.id AS user_id, u.name AS student_name, u.email AS student_email
+      FROM allocations a
+      JOIN students s ON a.student_id = s.id
+      JOIN users u ON s.user_id = u.id
+      JOIN hostels h ON a.hostel_id = h.id
+      JOIN rooms r ON a.room_id = r.id
+      WHERE a.id = ?
+    `, [allocationId]);
 
     res.status(201).json({
       success: true,
-      message: `Student successfully allocated to Room ${room.roomNumber}`,
-      data: allocation,
+      message: `Student successfully allocated to Room ${room.room_number}`,
+      data: formatAllocation(createdRows[0]),
     });
   } catch (error) {
     next(error);
@@ -154,41 +173,39 @@ export const allocateRoom = async (req, res, next) => {
 // @access  Private (Admin / Warden)
 export const deallocateRoom = async (req, res, next) => {
   try {
-    const allocation = await Allocation.findById(req.params.id);
-    if (!allocation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Allocation record not found',
-      });
+    const [allocations] = await pool.execute('SELECT * FROM allocations WHERE id = ?', [req.params.id]);
+    if (!allocations.length) {
+      return res.status(404).json({ success: false, message: 'Allocation record not found' });
     }
+    const allocation = allocations[0];
 
-    // Decrement room occupancy
-    const room = await Room.findById(allocation.roomId);
-    if (room && room.currentOccupancy > 0) {
-      room.currentOccupancy -= 1;
-      await room.save();
-    }
+    await withTransaction(async (conn) => {
+      // Decrement room occupancy
+      const [rooms] = await conn.execute('SELECT * FROM rooms WHERE id = ?', [allocation.room_id]);
+      if (rooms.length && rooms[0].current_occupancy > 0) {
+        const newOcc = rooms[0].current_occupancy - 1;
+        const newStat = newOcc === 0 ? 'Available' : 'Partially Occupied';
+        await conn.execute('UPDATE rooms SET current_occupancy = ?, status = ? WHERE id = ?', [newOcc, newStat, allocation.room_id]);
+      }
 
-    // Clear student assigned room
-    const student = await Student.findById(allocation.studentId);
-    if (student) {
-      student.hostelId = null;
-      student.roomId = null;
-      await student.save();
+      // Clear student's room
+      const [students] = await conn.execute('SELECT user_id FROM students WHERE id = ?', [allocation.student_id]);
+      await conn.execute('UPDATE students SET hostel_id = NULL, room_id = NULL WHERE id = ?', [allocation.student_id]);
 
-      // Notify student
-      await Notification.create({
-        userId: student.userId,
-        title: 'Room Deallocated',
-        message: 'Your room allocation has been vacated or revoked.',
-        type: 'room',
-        link: '/student/dashboard',
-      });
-    }
+      if (students.length) {
+        await conn.execute(
+          `INSERT INTO notifications (user_id, title, message, type, link)
+           VALUES (?, 'Room Deallocated', 'Your room allocation has been vacated or revoked.', 'room', '/student/dashboard')`,
+          [students[0].user_id]
+        );
+      }
 
-    allocation.status = 'Vacated';
-    allocation.vacateDate = new Date();
-    await allocation.save();
+      // Update allocation status
+      await conn.execute(
+        "UPDATE allocations SET status = 'Vacated', vacate_date = CURDATE() WHERE id = ?",
+        [allocation.id]
+      );
+    });
 
     res.status(200).json({
       success: true,
@@ -205,77 +222,89 @@ export const deallocateRoom = async (req, res, next) => {
 export const changeRoom = async (req, res, next) => {
   try {
     const { newRoomId, newHostelId, remarks } = req.body;
-    const allocation = await Allocation.findById(req.params.id);
 
-    if (!allocation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Allocation record not found',
-      });
+    const [allocations] = await pool.execute('SELECT * FROM allocations WHERE id = ?', [req.params.id]);
+    if (!allocations.length) {
+      return res.status(404).json({ success: false, message: 'Allocation record not found' });
     }
+    const allocation = allocations[0];
 
-    const newRoom = await Room.findById(newRoomId);
-    if (!newRoom) {
-      return res.status(404).json({
-        success: false,
-        message: 'New room not found',
-      });
+    const [newRooms] = await pool.execute('SELECT * FROM rooms WHERE id = ?', [newRoomId]);
+    if (!newRooms.length) {
+      return res.status(404).json({ success: false, message: 'New room not found' });
     }
+    const newRoom = newRooms[0];
 
-    if (newRoom.currentOccupancy >= newRoom.capacity) {
+    if (newRoom.current_occupancy >= newRoom.capacity) {
       return res.status(400).json({
         success: false,
-        message: `New room ${newRoom.roomNumber} is already full.`,
+        message: `New room ${newRoom.room_number} is already full.`,
       });
     }
 
-    // Decrement previous room occupancy
-    const oldRoom = await Room.findById(allocation.roomId);
-    if (oldRoom && oldRoom.currentOccupancy > 0) {
-      oldRoom.currentOccupancy -= 1;
-      await oldRoom.save();
-    }
+    const targetHostelId = newHostelId || newRoom.hostel_id;
 
-    // Increment new room occupancy
-    newRoom.currentOccupancy += 1;
-    await newRoom.save();
+    const newAllocId = await withTransaction(async (conn) => {
+      // 1. Decrement old room
+      const [oldRooms] = await conn.execute('SELECT * FROM rooms WHERE id = ?', [allocation.room_id]);
+      if (oldRooms.length && oldRooms[0].current_occupancy > 0) {
+        const oldOcc = oldRooms[0].current_occupancy - 1;
+        const oldStat = oldOcc === 0 ? 'Available' : 'Partially Occupied';
+        await conn.execute('UPDATE rooms SET current_occupancy = ?, status = ? WHERE id = ?', [oldOcc, oldStat, allocation.room_id]);
+      }
 
-    // Mark previous allocation as Transferred
-    allocation.status = 'Transferred';
-    allocation.vacateDate = new Date();
-    await allocation.save();
+      // 2. Increment new room
+      const nextOcc = newRoom.current_occupancy + 1;
+      const nextStat = nextOcc >= newRoom.capacity ? 'Fully Occupied' : 'Partially Occupied';
+      await conn.execute('UPDATE rooms SET current_occupancy = ?, status = ? WHERE id = ?', [nextOcc, nextStat, newRoom.id]);
 
-    // Create new allocation
-    const targetHostelId = newHostelId || newRoom.hostelId;
-    const newAllocation = await Allocation.create({
-      studentId: allocation.studentId,
-      hostelId: targetHostelId,
-      roomId: newRoom._id,
-      allocationDate: new Date(),
-      status: 'Active',
-      remarks: remarks || 'Room transfer approved',
+      // 3. Mark old allocation transferred
+      await conn.execute(
+        "UPDATE allocations SET status = 'Transferred', vacate_date = CURDATE() WHERE id = ?",
+        [allocation.id]
+      );
+
+      // 4. Create new allocation
+      const [newAlloc] = await conn.execute(
+        `INSERT INTO allocations (student_id, hostel_id, room_id, allocation_date, status, remarks)
+         VALUES (?, ?, ?, CURDATE(), 'Active', ?)`,
+        [allocation.student_id, targetHostelId, newRoom.id, remarks || 'Room transfer approved']
+      );
+
+      // 5. Update student
+      await conn.execute('UPDATE students SET hostel_id = ?, room_id = ? WHERE id = ?', [targetHostelId, newRoom.id, allocation.student_id]);
+
+      // 6. Notify student
+      const [students] = await conn.execute('SELECT user_id FROM students WHERE id = ?', [allocation.student_id]);
+      if (students.length) {
+        await conn.execute(
+          `INSERT INTO notifications (user_id, title, message, type, link)
+           VALUES (?, 'Room Transfer Complete', ?, 'room', '/student/my-room')`,
+          [students[0].user_id, `You have been transferred to Room ${newRoom.room_number}.`]
+        );
+      }
+
+      return newAlloc.insertId;
     });
 
-    // Update student
-    const student = await Student.findById(allocation.studentId);
-    if (student) {
-      student.hostelId = targetHostelId;
-      student.roomId = newRoom._id;
-      await student.save();
-
-      await Notification.create({
-        userId: student.userId,
-        title: 'Room Transfer Complete',
-        message: `You have been transferred to Room ${newRoom.roomNumber}.`,
-        type: 'room',
-        link: '/student/my-room',
-      });
-    }
+    const [createdRows] = await pool.execute(`
+      SELECT a.*,
+             h.name AS hostel_name, h.location AS hostel_location,
+             r.room_number, r.floor_number, r.room_type, r.capacity, r.current_occupancy,
+             s.student_id AS student_roll, s.course, s.department,
+             u.id AS user_id, u.name AS student_name, u.email AS student_email
+      FROM allocations a
+      JOIN students s ON a.student_id = s.id
+      JOIN users u ON s.user_id = u.id
+      JOIN hostels h ON a.hostel_id = h.id
+      JOIN rooms r ON a.room_id = r.id
+      WHERE a.id = ?
+    `, [newAllocId]);
 
     res.status(200).json({
       success: true,
-      message: `Transferred to Room ${newRoom.roomNumber} successfully`,
-      data: newAllocation,
+      message: `Transferred to Room ${newRoom.room_number} successfully`,
+      data: formatAllocation(createdRows[0]),
     });
   } catch (error) {
     next(error);

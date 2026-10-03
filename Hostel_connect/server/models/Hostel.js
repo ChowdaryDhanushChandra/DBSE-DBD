@@ -1,49 +1,11 @@
-import mongoose from 'mongoose';
+import pool from '../config/database.js';
+import { formatHostel } from '../utils/mysqlHelper.js';
 
-const hostelSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Please provide hostel name'],
-      trim: true,
-      unique: true,
-    },
-    location: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    gender: {
-      type: String,
-      enum: ['Boys', 'Girls', 'Co-ed'],
-      required: true,
-    },
-    totalRooms: {
-      type: Number,
-      default: 0,
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    wardenId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-    },
-    contactPhone: {
-      type: String,
-      default: '',
-    },
-    image: {
-      type: String,
-      default: '',
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+export const tableName = 'hostels';
 
-const Hostel = mongoose.model('Hostel', hostelSchema);
-export default Hostel;
+export const findById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM hostels WHERE id = ?', [id]);
+  return rows.length ? formatHostel(rows[0]) : null;
+};
+
+export default { tableName, findById };

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Mail, Key, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, ArrowRight, CheckCircle2, AlertCircle, Compass } from 'lucide-react';
 import api from '../../services/api';
+import SpaceBackground from '../../components/common/SpaceBackground';
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -29,43 +30,50 @@ export const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-            <Building2 className="w-7 h-7" />
+    <div className="relative min-h-screen bg-[#050816] text-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Starfield */}
+      <SpaceBackground />
+
+      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <Link to="/" className="inline-flex items-center space-x-3 mb-4 group">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-[0_0_25px_rgba(0,229,255,0.4)] group-hover:scale-105 transition-transform">
+            <Compass className="w-7 h-7 text-cyan-200" />
           </div>
         </Link>
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Reset Password</h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <h2 className="text-2xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">
+          Reset <span className="bg-gradient-to-r from-purple-400 via-cyan-300 to-white bg-clip-text text-transparent">Password</span>
+        </h2>
+        <p className="mt-1 text-xs text-slate-400">
           Enter your registered email to receive a password reset key
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-card rounded-3xl border border-slate-100">
+      <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+        <div className="bg-[#070D22]/85 backdrop-blur-xl py-8 px-6 shadow-[0_0_40px_rgba(0,0,0,0.6)] rounded-3xl border border-cyan-500/20 shadow-glass relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+
           {error && (
-            <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl flex items-center space-x-2 border border-rose-200">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="mb-4 p-3 bg-rose-500/15 text-rose-300 text-xs rounded-xl flex items-center space-x-2 border border-rose-500/30">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{error}</span>
             </div>
           )}
 
           {success ? (
             <div className="text-center space-y-4">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-slate-800">Password Reset Key Generated</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-white">Password Reset Key Generated</h3>
+              <p className="text-xs text-slate-400">
                 For demo testing, use the reset key below:
               </p>
-              <div className="p-3 bg-slate-100 font-mono text-xs text-indigo-700 break-all rounded-xl select-all">
+              <div className="p-3 bg-black/50 font-mono text-xs text-cyan-400 border border-cyan-500/30 break-all rounded-xl select-all shadow-inner">
                 {resetToken}
               </div>
               <Link
                 to={`/reset-password?token=${resetToken}`}
-                className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition-all shadow-sm"
+                className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)] cursor-pointer"
               >
                 Proceed to Reset Password
               </Link>
@@ -73,11 +81,11 @@ export const ForgotPassword = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Registered Email
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-cyan-400/60">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
@@ -86,7 +94,7 @@ export const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="student@hostelconnect.com"
-                    className="block w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="block w-full pl-10 pr-3.5 py-2.5 text-sm bg-white/[0.04] border border-cyan-500/20 rounded-xl focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400 text-white placeholder-slate-500"
                   />
                 </div>
               </div>
@@ -94,15 +102,15 @@ export const ForgotPassword = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-200 transition-all disabled:opacity-50"
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Submitting...' : 'Generate Reset Key'}
               </button>
             </form>
           )}
 
-          <div className="text-center pt-4 border-t border-slate-100 mt-6">
-            <Link to="/login" className="text-xs font-semibold text-slate-500 hover:text-indigo-600">
+          <div className="text-center pt-4 border-t border-white/10 mt-6">
+            <Link to="/login" className="text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors">
               ← Return to sign in
             </Link>
           </div>
@@ -137,37 +145,43 @@ export const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-            <Building2 className="w-7 h-7" />
+    <div className="relative min-h-screen bg-[#050816] text-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden">
+      <SpaceBackground />
+
+      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <Link to="/" className="inline-flex items-center space-x-3 mb-4 group">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-[0_0_25px_rgba(0,229,255,0.4)] group-hover:scale-105 transition-transform">
+            <Compass className="w-7 h-7 text-cyan-200" />
           </div>
         </Link>
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Set New Password</h2>
+        <h2 className="text-2xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">
+          Set New <span className="bg-gradient-to-r from-purple-400 via-cyan-300 to-white bg-clip-text text-transparent">Password</span>
+        </h2>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-card rounded-3xl border border-slate-100">
+      <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+        <div className="bg-[#070D22]/85 backdrop-blur-xl py-8 px-6 shadow-[0_0_40px_rgba(0,0,0,0.6)] rounded-3xl border border-cyan-500/20 shadow-glass relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+
           {error && (
-            <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl flex items-center space-x-2 border border-rose-200">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="mb-4 p-3 bg-rose-500/15 text-rose-300 text-xs rounded-xl flex items-center space-x-2 border border-rose-500/30">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{error}</span>
             </div>
           )}
 
           {success ? (
             <div className="text-center space-y-4">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-slate-800">Password Changed Successfully!</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-white">Password Changed Successfully!</h3>
+              <p className="text-xs text-slate-400">
                 You can now log in with your updated credentials.
               </p>
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition-all shadow-sm"
+                className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)] cursor-pointer"
               >
                 Sign In to Dashboard
               </Link>
@@ -175,32 +189,32 @@ export const ResetPassword = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Reset Key / Token</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Reset Key / Token</label>
                 <input
                   type="text"
                   required
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   placeholder="Paste reset token"
-                  className="block w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl"
+                  className="block w-full px-3.5 py-2.5 text-sm bg-white/[0.04] border border-cyan-500/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">New Password</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">New Password</label>
                 <input
                   type="password"
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="block w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl"
+                  className="block w-full px-3.5 py-2.5 text-sm bg-white/[0.04] border border-cyan-500/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-200 transition-all disabled:opacity-50"
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Saving...' : 'Update Password'}
               </button>

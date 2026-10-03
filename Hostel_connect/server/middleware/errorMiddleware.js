@@ -8,25 +8,28 @@ export const errorHandler = (err, req, res, next) => {
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message;
 
-  // Handle Mongoose duplicate key error
-  if (err.code === 11000) {
+  // Handle MySQL Duplicate Entry (Error 1062 / ER_DUP_ENTRY)
+  if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
     statusCode = 400;
-    const field = Object.keys(err.keyValue)[0];
-    message = `Duplicate value entered for ${field} field. Please use another value.`;
+    message = 'Duplicate entry detected. A record with this unique value already exists.';
   }
 
-  // Handle Mongoose CastError (invalid ObjectId)
-  if (err.name === 'CastError') {
-    statusCode = 404;
-    message = `Resource not found with id: ${err.value}`;
+  // Handle MySQL Foreign Key Constraint Failures (Error 1452)
+  if (err.code === 'ER_NO_REFERENCED_ROW_2' || err.errno === 1452) {
+    statusCode = 400;
+    message = 'Referenced record (Hostel, Room, or Student) does not exist.';
   }
 
-  // Handle Mongoose ValidationError
-  if (err.name === 'ValidationError') {
+  // Handle MySQL Foreign Key Delete Restriction (Error 1451)
+  if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.errno === 1451) {
     statusCode = 400;
-    message = Object.values(err.errors)
-      .map((val) => val.message)
-      .join(', ');
+    message = 'Cannot delete this record because other records depend on it.';
+  }
+
+  // Handle MySQL Connection Refused
+  if (err.code === 'ECONNREFUSED') {
+    statusCode = 503;
+    message = 'Database service unavailable. Please check that MySQL server is running.';
   }
 
   res.status(statusCode).json({
